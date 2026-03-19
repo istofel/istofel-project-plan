@@ -20,23 +20,16 @@ Given a product idea, this skill produces three professional technical documents
 
 ## Installation
 
-This skill is distributed as a `.skill` file compatible with [Claude.ai](https://claude.ai).
-
-### Option A — Install from Release
-
-1. Download `istofel_project_plan.skill` from the [Releases](https://github.com/istofel/istofel_project_plan/releases) page
-2. Open [Claude.ai](https://claude.ai)
-3. Go to **Settings → Skills**
-4. Click **Install Skill** and upload the `.skill` file
-
-### Option B — Build from Source
+### 1. Clone the repository
 
 ```bash
 git clone https://github.com/istofel/istofel_project_plan.git
 cd istofel_project_plan
 ```
 
-Then package it:
+### 2. Package the skill
+
+Run the script below to generate the `.skill` file:
 
 ```python
 python -c "
@@ -51,7 +44,11 @@ print('Done: istofel_project_plan.skill')
 "
 ```
 
-Upload the generated `.skill` file to Claude.ai as described in Option A.
+### 3. Install in Claude
+
+1. Open [Claude.ai](https://claude.ai) or Claude Code
+2. Go to **Settings → Skills**
+3. Click **Install Skill** and upload the generated `istofel_project_plan.skill` file
 
 ---
 
