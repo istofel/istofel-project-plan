@@ -27,28 +27,16 @@ git clone https://github.com/istofel/istofel_project_plan.git
 cd istofel_project_plan
 ```
 
-### 2. Package the skill
+### 2. Download the ZIP
 
-Run the script below to generate the `.skill` file:
-
-```python
-python -c "
-import zipfile, os
-with zipfile.ZipFile('istofel_project_plan.skill', 'w', zipfile.ZIP_DEFLATED) as zf:
-    for root, dirs, files in os.walk('istofel-project-plan'):
-        for file in files:
-            filepath = os.path.join(root, file)
-            arcname = os.path.relpath(filepath, os.path.dirname('istofel-project-plan'))
-            zf.write(filepath, arcname)
-print('Done: istofel_project_plan.skill')
-"
-```
+On the repository page, click **Code → Download ZIP** and extract it.
 
 ### 3. Install in Claude
 
 1. Open [Claude.ai](https://claude.ai) or Claude Code
 2. Go to **Settings → Skills**
-3. Click **Install Skill** and upload the generated `istofel_project_plan.skill` file
+3. Click **Install Skill**
+4. Select the extracted folder `istofel-project-plan/`
 
 ---
 
