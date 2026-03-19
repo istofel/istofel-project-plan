@@ -1,4 +1,4 @@
-# istofel_project_plan
+# istofel-project-plan
 
 A professional Claude skill that guides you through the complete product planning process — from raw idea to implementation-ready documentation — in three structured steps: **MVP Scope → PRD → SPEC**.
 
@@ -23,20 +23,20 @@ Given a product idea, this skill produces three professional technical documents
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/istofel/istofel_project_plan.git
-cd istofel_project_plan
+git clone https://github.com/istofel/istofel-project-plan.git
+cd istofel-project-plan
 ```
 
 ### 2. Download the ZIP
 
-On the repository page, click **Code → Download ZIP** and extract it.
+On the repository page, click **Code → Download ZIP**.
 
 ### 3. Install in Claude
 
 1. Open [Claude.ai](https://claude.ai) or Claude Code
 2. Go to **Settings → Skills**
-3. Click **Install Skill**
-4. Select the extracted folder `istofel-project-plan/`
+3. Click **Upload a skill**
+4. Select the Download ZIP **istofel-project-plan-main.zip** `istofel-project-plan/`
 
 ---
 
