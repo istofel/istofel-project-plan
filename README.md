@@ -1,4 +1,10 @@
-# istofel-project-plan
+<p align="center">
+    <img src="docs/banner/pppok.png" width="900px">
+</p>
+
+<hr/>
+
+# Istofel Project Plan
 
 A professional Claude skill that guides you through the complete product planning process — from raw idea to implementation-ready documentation — in three structured steps: **MVP Scope → PRD → SPEC**.
 
