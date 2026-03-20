@@ -19,8 +19,8 @@ Given a product idea, this skill produces three professional technical documents
 | Document | Purpose |
 |----------|---------|
 | **MVP Scope** | Market research, competitive landscape, recommended tech stack, architecture overview, data model preview, business rules, monetization, feature roadmap, and risks |
-| **PRD** | Design principles, personas, use case map, functional requirements with acceptance criteria, UI states, ASCII layout, user flows, feature specification, data schema, sprint roadmap, and global acceptance criteria |
-| **SPEC** | Module-by-module technical specification with typed signatures, critical logic, sequence diagrams, DB schema with constraints, API contracts, error hierarchy, security, observability, test strategy, and CI/CD pipeline |
+| **PRD** | Design principles, personas, use case map, functional requirements with typed business rules, UI states, ASCII layout, user flows, feature specification, data schema, sprint roadmap, and global acceptance criteria |
+| **SPEC** | ADRs, module-by-module technical specification with typed signatures, critical logic, state machines, domain invariants, build sequence with checkpoints, sequence diagrams, DB schema with constraints, API contracts, error hierarchy, security, observability, test strategy, and CI/CD pipeline |
 
 ---
 
@@ -42,7 +42,7 @@ On the repository page, click **Code → Download ZIP**.
 1. Open [Claude.ai](https://claude.ai) or Claude Code
 2. Go to **Settings → Skills**
 3. Click **Upload a skill**
-4. Select the Download ZIP **istofel-project-plan-main.zip** `istofel-project-plan/`
+4. Select the Downloaded ZIP **istofel-project-plan-main.zip** `istofel-project-plan/`
 
 ---
 
@@ -99,16 +99,18 @@ Claude generates the full PRD covering:
 
 - Design principles
 - Personas with use case map
-- Functional requirements with acceptance criteria and error handling
+- Functional requirements with acceptance criteria, typed business rules, and error handling
 - Non-functional requirements
 - ASCII layout of the main interface
 - Screen states (offline, empty, loading, error, ready)
 - User flows as pseudoflowcharts (onboarding, happy path, etc.)
-- Feature specification with components, rules, and MVP limitations
+- Feature specification with components, typed rules, and MVP limitations
 - Complete data schema with indexes and migration strategy
 - Sprint roadmap
 - Global acceptance criteria (binary definition of done)
 - Risks, out-of-scope, and glossary
+
+> ⚠️ The PRD contains **no mentions of libraries, frameworks, languages, or infrastructure**. Those decisions belong in the SPEC. Mixing product rules with technical decisions causes the agent to treat revisable choices as immutable business rules.
 
 After reviewing, Claude asks:
 
@@ -120,12 +122,15 @@ After reviewing, Claude asks:
 
 Claude generates the full SPEC covering:
 
+- **ADRs (Architecture Decision Records)** — each significant technical decision documented with context, decision, rationale, and consequences; the agent treats ADRs as closed decisions and does not revisit them
 - Architecture diagram with layers and protocols
 - Project directory tree with per-file responsibility
 - Global constants and environment variables
 - Module-by-module specification (typed signatures, critical logic, framework notes)
 - Session state documentation
 - Complete SQL schema with CHECK constraints and migration strategy
+- **State machines and domain invariants** — for entities with complex lifecycles: state transitions with side effects, terminal states, and four types of invariants (Invariant, Validation, State Transition, Authorization)
+- **Build sequence** — numbered linear steps with concrete implementation items and mandatory validation checkpoints; the agent must not advance to the next step without confirming the previous one works
 - API contracts (internal endpoints + external APIs consumed)
 - Error hierarchy with UI handling per exception type
 - Security checklist (sanitization, rate limiting, secrets management)
@@ -220,9 +225,11 @@ These cover: data retention policy, LGPD/GDPR compliance, observability setup, i
 - Finalized invoice receives a sequential number and is locked for editing
 
 **Rules:**
-- Hourly rate defaults to the client's configured rate; can be overridden per invoice
-- Tax rate is configured per user account (default: 0%)
-- Invoice number format: `INV-{YEAR}-{SEQUENCE}` (e.g., INV-2026-0042)
+- Hourly rate defaults to the client's configured rate; can be overridden per invoice | Type: Validation
+- Tax rate is configured per user account (default: 0%) | Type: Invariant
+- Invoice number format: `INV-{YEAR}-{SEQUENCE}` (e.g., INV-2026-0042) | Type: Invariant
+- Only the invoice owner can delete a draft invoice | Type: Authorization
+- Invoice transitions from `draft` to `finalized` when the user confirms; once finalized, editing is locked | Type: State Transition
 
 **Error handling:**
 - No time entries in selected range → show empty state with CTA to log hours
@@ -245,64 +252,86 @@ These cover: data retention policy, LGPD/GDPR compliance, observability setup, i
 ### SPEC — excerpt
 
 ```markdown
-## 4. Module Specification
+## 2. ADRs — Architecture Decision Records
 
-### Module: Invoice Service
-**File:** `src/invoices/service.py`  
-**Responsibility:** Orchestrates invoice creation — aggregates time entries, applies rates and taxes, persists to DB. Does NOT handle PDF rendering or email delivery.
+ADR-01: FastAPI as backend framework
+  Context:  Need async-native Python framework; team is familiar with Python.
+            Evaluated Django REST Framework and Flask.
+  Decision: FastAPI over Django REST Framework.
+  Motivo:   Native async support, automatic OpenAPI docs, Pydantic validation
+            built-in. Django adds ORM and admin overhead not needed here.
+  Consequences: Follow FastAPI dependency injection patterns.
+                Do not use Django ORM or Flask blueprints.
 
-```python
-@dataclass
-class InvoiceLineItem:
-    description: str
-    hours: float
-    rate: float
-    amount: float  # hours * rate
+---
 
-@dataclass
-class InvoiceResult:
-    id: str
-    number: str          # INV-2026-0042
-    client_id: str
-    line_items: list[InvoiceLineItem]
-    subtotal: float
-    tax_rate: float
-    tax_amount: float
-    total: float
-    created_at: str      # ISO 8601 UTC
+## 8. State Machines and Domain Invariants
 
-class InvoiceService:
-    def create(
-        self,
-        user_id: str,
-        client_id: str,
-        date_from: str,
-        date_to: str,
-    ) -> InvoiceResult:
-        """Creates invoice from time entries in date range.
-        
-        Raises:
-            NoTimeEntriesError: If no entries exist in range.
-            ClientNotFoundError: If client does not exist.
-            MissingHourlyRateError: If client has no rate configured.
-        """
-```
+### Invoice — State Machine
 
-### Sequence Diagram — Invoice Creation
+States: draft | finalized | cancelled
 
-```
-User      API        InvoiceService   TimeEntryRepo   InvoiceRepo    DB
-  │         │               │               │              │           │
-  │─ POST ─→│               │               │              │           │
-  │         │─ create() ───→│               │              │           │
-  │         │               │─ find_by_range→│              │           │
-  │         │               │←── entries ───│              │           │
-  │         │               │─ calc totals  │              │           │
-  │         │               │─ save() ──────────────────→│─ INSERT ──→│
-  │         │               │←── invoice ───────────────│            │
-  │         │←── 201 ───────│               │              │           │
-  │←── resp─│               │               │              │           │
-```
+Transitions:
+  draft ── user confirms ──→ finalized
+      side effect: invoice number assigned, editing locked
+
+  draft ── user discards ──→ cancelled
+      side effect: line items soft-deleted
+
+  finalized ── admin voids ──→ cancelled
+      side effect: credit note generated
+
+Terminal states: cancelled — no further transitions allowed
+
+### Domain Invariants
+
+INV-01: [Invariant]
+  A finalized invoice always has a non-null, unique invoice number.
+  Verify in: invoice repository save() — assert before commit
+
+INV-02: [Validation]
+  An invoice can only be finalized if it has at least one line item with hours > 0.
+  Verify in: InvoiceService.finalize() — check before state transition
+
+INV-03: [State Transition]
+  Invoice moves from draft to finalized when user confirms; editing is locked immediately.
+  Side effect: sequential number assigned atomically.
+  Verify in: domain state machine — never allow attribute mutation after finalization
+
+INV-04: [Authorization]
+  Only the invoice owner or an admin can cancel a finalized invoice.
+  Verify in: authorization middleware — before reaching InvoiceService
+
+---
+
+## 9. Build Sequence
+
+STEP 1: Project setup and directory structure
+  What to implement:
+    - Initialize repo, install dependencies, configure linter and formatter
+    - Create src/ structure per section 3
+  Validation checkpoint (must pass before advancing):
+    - App starts without errors
+    - Linter passes with zero warnings
+  Dependencies: none
+
+STEP 2: Database and migrations
+  What to implement:
+    - Define full schema per section 7
+    - Run initial migration, verify tables and indexes
+  Validation checkpoint:
+    - All tables created, foreign keys enforced
+    - Migration is idempotent (safe to run twice)
+  Dependencies: Step 1
+
+STEP 3: Core business logic
+  What to implement:
+    - InvoiceService, TimeEntryRepository with typed signatures
+    - Domain invariants INV-01 through INV-04
+  Validation checkpoint:
+    - Unit tests for all invariants pass
+    - 80% coverage on core/
+  Dependencies: Step 2
 ```
 
 ---
@@ -315,7 +344,7 @@ istofel-project-plan/
 └── references/
     ├── mvp-scope.md                # Complete MVP Scope structure and checklist
     ├── prd.md                      # Complete PRD structure and checklist
-    └── spec.md                     # Complete SPEC structure and checklist
+    └── spec.md                     # Complete SPEC structure and checklist (21 sections)
 ```
 
 ---
