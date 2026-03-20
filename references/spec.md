@@ -48,7 +48,39 @@
 
 ---
 
-### 2. Estrutura do Projeto
+### 2. ADRs — Architecture Decision Records
+
+Cada decisão técnica significativa deve ser documentada com contexto, decisão tomada e consequências. Sem ADRs, o agente pode questionar ou reverter decisões já tomadas, gerando retrabalho e inconsistência entre sessões.
+
+Para cada decisão técnica relevante:
+
+```
+ADR-XX: [título curto da decisão — ex: "Uso de SQLite como banco principal"]
+
+Contexto:
+  [Qual problema ou necessidade levou a esta decisão.
+   Quais alternativas foram consideradas.]
+
+Decisão:
+  [O que foi decidido, de forma direta.]
+
+Motivo:
+  [Por que esta opção foi escolhida sobre as alternativas.
+   Pode incluir referências a projetos similares validados.]
+
+Consequências:
+  [O que muda como resultado desta decisão.
+   Padrões que devem ser seguidos obrigatoriamente.
+   O que o agente NÃO deve fazer como resultado desta decisão.]
+```
+
+> ADRs são especialmente críticos para: escolha de ORM/banco, boilerplate ou framework base, estratégia de autenticação, padrão de comunicação entre camadas, e qualquer decisão que, se revertida, quebre outras partes do sistema.
+
+> Uma vez documentado um ADR, o agente trata aquela decisão como fechada — não a questiona nem propõe alternativas, salvo se explicitamente solicitado.
+
+---
+
+### 3. Estrutura do Projeto
 
 Árvore de diretórios com comentário inline por arquivo/pasta explicando responsabilidade:
 
@@ -74,7 +106,7 @@ projeto/
 
 ---
 
-### 3. Constantes Globais
+### 4. Constantes Globais
 
 Arquivo dedicado para todas as constantes e valores padrão:
 
@@ -98,7 +130,7 @@ SUPPORTED_TYPES  = [...]      # descrição
 
 ---
 
-### 4. Especificação por Módulo
+### 5. Especificação por Módulo
 
 Para cada módulo/serviço do projeto:
 
@@ -130,7 +162,7 @@ Notas de framework:
 
 ---
 
-### 5. Estado de Sessão
+### 6. Estado de Sessão
 
 Para frameworks com estado de sessão (Streamlit, Chainlit, Redux, Zustand, etc.):
 
@@ -143,7 +175,7 @@ Para frameworks com estado de sessão (Streamlit, Chainlit, Redux, Zustand, etc.
 
 ---
 
-### 6. Modelagem de Dados Completa
+### 7. Modelagem de Dados Completa
 
 **Schema SQL (ou equivalente):**
 
@@ -181,7 +213,7 @@ ID pattern: [padrão de geração de IDs]
 
 ---
 
-### 7. Máquinas de Estado e Invariantes
+### 8. Máquinas de Estado e Invariantes
 
 *(Incluir quando o produto tiver entidades com ciclo de vida complexo — ex: pedidos, assinaturas, documentos, tarefas. Omitir para entidades simples sem transições de estado.)*
 
@@ -244,7 +276,7 @@ INV-04: [Autorização]
 
 ---
 
-### 8. Sequência de Build
+### 9. Sequência de Build
 
 > Esta seção é instrução direta para o agente implementar — diferente do sprint roadmap (organização de projeto) e do CI/CD pipeline (infraestrutura de entrega). A sequência de build define a ordem linear de implementação, com checkpoint de validação obrigatório entre cada passo. O agente não deve avançar para o próximo passo sem confirmar que o anterior funciona.
 
@@ -299,7 +331,7 @@ PASSO 6: [nome do passo — ex: Testes e cobertura mínima]
 
 ---
 
-### 9. Contratos de API
+### 10. Contratos de API
 
 **9.1 Convenções gerais**
 - Base URL, versionamento, autenticação
@@ -341,7 +373,7 @@ Tratamento de erro: [comportamento em falha / timeout]
 
 ---
 
-### 10. Autenticação e Autorização
+### 11. Autenticação e Autorização
 
 *(omitir se produto single-user local)*
 
@@ -353,7 +385,7 @@ Tratamento de erro: [comportamento em falha / timeout]
 
 ---
 
-### 11. Lógica de Negócio — Implementação
+### 12. Lógica de Negócio — Implementação
 
 Para cada regra crítica do PRD:
 
@@ -372,7 +404,7 @@ Rollback: [se transacional, como reverter em caso de falha]
 
 ---
 
-### 12. Integrações — Implementação Técnica
+### 13. Integrações — Implementação Técnica
 
 Para cada integração:
 
@@ -384,7 +416,7 @@ Para cada integração:
 
 ---
 
-### 13. Processamento Assíncrono
+### 14. Processamento Assíncrono
 
 *(omitir se não aplicável)*
 
@@ -393,7 +425,7 @@ Para cada integração:
 
 ---
 
-### 14. Gestão de Erros
+### 15. Gestão de Erros
 
 **Hierarquia de exceções:**
 
@@ -421,7 +453,7 @@ class NotFoundError(AppBaseError):
 
 ---
 
-### 15. Segurança
+### 16. Segurança
 
 - Sanitização de inputs (camadas e abordagem)
 - Proteção contra injeção (SQL, XSS, CSRF — conforme stack)
@@ -434,7 +466,7 @@ class NotFoundError(AppBaseError):
 
 ---
 
-### 16. Observabilidade
+### 17. Observabilidade
 
 **Logging**
 - Formato (JSON estruturado recomendado)
@@ -452,7 +484,7 @@ class NotFoundError(AppBaseError):
 
 ---
 
-### 17. Estratégia de Testes
+### 18. Estratégia de Testes
 
 **17.1 Categorias e ferramentas**
 
@@ -488,7 +520,7 @@ def mock_servico_externo():
 
 ---
 
-### 18. Deploy e Infraestrutura
+### 19. Deploy e Infraestrutura
 
 **18.1 Ambientes**
 
@@ -509,7 +541,7 @@ def mock_servico_externo():
 
 ---
 
-### 19. Plano de Rollout
+### 20. Plano de Rollout
 
 - Feature flags: quais features ficam atrás de flag no lançamento
 - Estratégia de rollout gradual (se aplicável)
@@ -517,7 +549,7 @@ def mock_servico_externo():
 
 ---
 
-### 20. Diagramas de Sequência
+### 21. Diagramas de Sequência
 
 Para cada fluxo crítico do PRD, diagrama ASCII com atores, setas e ordem temporal:
 
@@ -544,6 +576,7 @@ Diagramas obrigatórios:
 
 ### Checklist de qualidade — SPEC
 
+- [ ] ADRs documentados para cada decisão técnica significativa (stack, ORM, auth, padrão de camadas)?
 - [ ] Diagrama de arquitetura ASCII cobre todos os componentes?
 - [ ] Estrutura de diretórios com responsabilidade por arquivo?
 - [ ] Constantes globais em arquivo dedicado com variáveis de ambiente?

@@ -2,6 +2,8 @@
 
 > Gerado após aprovação do MVP Scope.
 
+> ⚠️ **Regra fundamental do PRD:** Este documento não deve conter nenhuma menção a biblioteca, framework, linguagem de programação, infraestrutura, stack tecnológica, schema de banco com tipos técnicos, tokens de design, configurações de deploy ou estimativas de custo de infraestrutura. O PRD responde **o quê e por quê** — decisões de **como construir** pertencem à SPEC. PRDs que misturam produto com tecnologia fazem o agente tratar decisões técnicas revisáveis como regras imutáveis de negócio, gerando código inconsistente.
+
 ---
 
 ## Estrutura do PRD
@@ -307,6 +309,7 @@ O MVP é considerado completo quando:
 - [ ] Critérios de aceite globais são binários e verificáveis?
 - [ ] Fora de escopo explicitado com motivo?
 - [ ] Roadmap em sprints com entregáveis claros?
+- [ ] O PRD não contém nenhuma menção a biblioteca, framework, linguagem, infraestrutura ou stack tecnológica? (essas decisões pertencem à SPEC)
 
 ---
 
