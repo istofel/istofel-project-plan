@@ -66,12 +66,25 @@ Critérios de aceite:
 - [condição verificável]
 
 Regras:
-- [regra de negócio específica]
-- [tratamento de edge case]
+- [descrição da regra] | Tipo: Validação
+- [descrição da regra] | Tipo: Invariante
+- [descrição da regra] | Tipo: Transição de Estado
+- [descrição da regra] | Tipo: Autorização
 
 Tratamento de erros:
 - [situação de falha] → [comportamento esperado]
 ```
+
+**Tipos de regra de negócio — definições:**
+
+| Tipo | Definição | Onde verificar no código |
+|------|-----------|--------------------------|
+| **Validação** | Condição que deve ser verdadeira *antes* de uma ação acontecer. Se não atendida, a ação é bloqueada. | Na entrada da ação / use case |
+| **Invariante** | Verdade que deve ser válida *a qualquer momento*, independente de qual ação chegou lá. Se falsa, há um bug. | Pode ser verificada no banco a qualquer hora |
+| **Transição de Estado** | Define quando um objeto muda de estado e o que acontece como consequência dessa mudança. | Na camada de domínio / state machine |
+| **Autorização** | Define quem pode fazer o quê, sob quais condições — verifica o ator e seu poder, não o estado dos dados. | Middleware / camada de autorização |
+
+> Classificar cada regra por tipo elimina ambiguidade para o agente: ele sabe onde no código a regra deve ser implementada e verificada.
 
 > Critérios de aceite devem ser verificáveis — evitar descrições vagas.
 
@@ -164,8 +177,8 @@ Componentes internos:
 - [componente / classe / serviço]
 
 Regras:
-- [regra de negócio específica]
-- [limite ou restrição]
+- [regra de negócio específica] | Tipo: [Validação / Invariante / Transição de Estado / Autorização]
+- [limite ou restrição] | Tipo: [Validação / Invariante / Transição de Estado / Autorização]
 
 Tratamento de erros:
 - [condição] → [comportamento]
@@ -284,10 +297,11 @@ O MVP é considerado completo quando:
 - [ ] Princípios de design declarados?
 - [ ] Mapa de casos de uso liga personas a features?
 - [ ] Todos os RFs têm critérios de aceite verificáveis?
+- [ ] Todas as regras de negócio dos RFs estão classificadas por tipo (Validação / Invariante / Transição / Autorização)?
 - [ ] Tratamento de erros definido por feature?
 - [ ] Estados da tela documentados (incluindo vazios e erros)?
 - [ ] User flows cobrem onboarding e happy path com ramificações de erro?
-- [ ] Especificação de features detalha componentes, regras e limitações do MVP?
+- [ ] Especificação de features detalha componentes, regras tipadas e limitações do MVP?
 - [ ] Schema de dados com índices, constraints e estratégia de migração?
 - [ ] Requisitos de instalação/distribuição cobertos (se aplicável)?
 - [ ] Critérios de aceite globais são binários e verificáveis?

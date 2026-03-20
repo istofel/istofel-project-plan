@@ -214,32 +214,99 @@ Estados terminais: [estado_d] — não permite transição de saída
 
 Invariantes são verdades absolutas do domínio — nunca podem ser violadas, independentemente de como o sistema chegou àquele estado. Numerar para referência cruzada com testes e regras de negócio.
 
-```
-INV-01: [descrição da invariante — verdade que sempre deve ser verdadeira]
-  Exemplo: "Um pedido no estado 'pago' nunca pode ter valor total = 0"
-  Verificar em: [onde no código esta invariante deve ser checada]
+Cobrir os quatro tipos de regra de negócio:
 
-INV-02: [descrição]
-  Exemplo: "Um usuário com plano 'free' nunca pode ter mais de X projetos ativos"
-  Verificar em: [onde no código]
-
-INV-03: [descrição]
-  Exemplo: "Uma assinatura cancelada não pode ser reativada sem novo pagamento"
-  Verificar em: [onde no código]
 ```
+INV-01: [Invariante]
+  Descrição: verdade que deve ser válida a qualquer momento no banco
+  Exemplo: "Todo usuário ativo tem exatamente um plano associado"
+  Verificar em: [onde no código — pode ser verificada no banco a qualquer hora]
+
+INV-02: [Validação]
+  Descrição: condição que deve ser verdadeira antes de uma ação acontecer; se não atendida, a ação é bloqueada
+  Exemplo: "Pedido só pode ser confirmado se houver ao menos um item com quantidade > 0"
+  Verificar em: [na entrada da ação / use case, antes de qualquer persistência]
+
+INV-03: [Transição de Estado]
+  Descrição: define quando um objeto muda de estado e o que acontece como consequência obrigatória dessa mudança
+  Exemplo: "Assinatura vai de ativa para inadimplente após 3 dias sem pagamento; ao transitar, acesso premium é suspenso automaticamente"
+  Verificar em: [na camada de domínio / state machine — nunca deixar a transição acontecer sem os efeitos colaterais]
+
+INV-04: [Autorização]
+  Descrição: define quem pode fazer o quê, sob quais condições — verifica o ator e seu poder, não o estado dos dados
+  Exemplo: "Só o dono do projeto pode deletá-lo"; "Usuário Free não pode exportar PDF"; "Gerente aprova até R$1.000, acima disso só o diretor"
+  Verificar em: [middleware / camada de autorização — antes de chegar na lógica de negócio]
+```
+
+> A diferença entre Validação e Autorização: validação verifica o estado dos dados; autorização verifica quem está agindo e qual poder essa pessoa tem.
 
 > Invariantes respondem perguntas como "o que acontece com os registros quando um usuário faz downgrade?" — a resposta deve estar aqui, não ser inferida pelo agente ou desenvolvedor.
 
 ---
 
-### 8. Contratos de API
+### 8. Sequência de Build
 
-**8.1 Convenções gerais**
+> Esta seção é instrução direta para o agente implementar — diferente do sprint roadmap (organização de projeto) e do CI/CD pipeline (infraestrutura de entrega). A sequência de build define a ordem linear de implementação, com checkpoint de validação obrigatório entre cada passo. O agente não deve avançar para o próximo passo sem confirmar que o anterior funciona.
+
+```
+PASSO 1: [nome do passo — ex: Setup do projeto e estrutura de diretórios]
+  O que implementar:
+    - [item concreto]
+    - [item concreto]
+  Checkpoint de validação (deve passar antes de avançar):
+    - [condição verificável — ex: "app sobe sem erros", "teste X passa"]
+  Dependências: nenhuma
+
+PASSO 2: [nome do passo — ex: Banco de dados e migrações]
+  O que implementar:
+    - [item concreto]
+    - [item concreto]
+  Checkpoint de validação:
+    - [condição verificável]
+  Dependências: Passo 1
+
+PASSO 3: [nome do passo — ex: Módulo core / lógica de negócio central]
+  O que implementar:
+    - [item concreto]
+    - [item concreto]
+  Checkpoint de validação:
+    - [condição verificável]
+  Dependências: Passo 2
+
+PASSO 4: [nome do passo — ex: Integrações externas]
+  O que implementar:
+    - [item concreto]
+  Checkpoint de validação:
+    - [condição verificável]
+  Dependências: Passo 3
+
+PASSO 5: [nome do passo — ex: UI / camada de apresentação]
+  O que implementar:
+    - [item concreto]
+  Checkpoint de validação:
+    - [condição verificável]
+  Dependências: Passos 3 e 4
+
+PASSO 6: [nome do passo — ex: Testes e cobertura mínima]
+  O que implementar:
+    - [item concreto]
+  Checkpoint de validação:
+    - [cobertura mínima atingida — conforme seção 16.4]
+  Dependências: Todos os passos anteriores
+```
+
+> Adaptar o número de passos ao produto. A ordem padrão recomendada é: infraestrutura → dados → domínio/core → integrações → UI → testes. Nunca implementar UI antes do core estar validado.
+
+---
+
+### 9. Contratos de API
+
+**9.1 Convenções gerais**
 - Base URL, versionamento, autenticação
 - Paginação padrão
 - Formato de erros
 
-**8.2 Endpoints internos** (se o produto expõe API):
+**9.2 Endpoints internos** (se o produto expõe API):
 
 ```
 [MÉTODO] /v1/[recurso]
@@ -257,7 +324,7 @@ Errors:
   429 — rate limit
 ```
 
-**8.3 APIs externas consumidas** — contratos detalhados com request/response/campos de métricas:
+**9.3 APIs externas consumidas** — contratos detalhados com request/response/campos de métricas:
 
 Para cada endpoint externo relevante:
 
@@ -274,7 +341,7 @@ Tratamento de erro: [comportamento em falha / timeout]
 
 ---
 
-### 9. Autenticação e Autorização
+### 10. Autenticação e Autorização
 
 *(omitir se produto single-user local)*
 
@@ -286,12 +353,12 @@ Tratamento de erro: [comportamento em falha / timeout]
 
 ---
 
-### 10. Lógica de Negócio — Implementação
+### 11. Lógica de Negócio — Implementação
 
 Para cada regra crítica do PRD:
 
 ```
-Regra: [RN-ID]
+Regra: [RN-ID] | Tipo: [Validação / Invariante / Transição de Estado / Autorização]
 Trigger: [o que dispara]
 Validações:
   - [condição] → [erro ou ação]
@@ -305,7 +372,7 @@ Rollback: [se transacional, como reverter em caso de falha]
 
 ---
 
-### 11. Integrações — Implementação Técnica
+### 12. Integrações — Implementação Técnica
 
 Para cada integração:
 
@@ -317,7 +384,7 @@ Para cada integração:
 
 ---
 
-### 12. Processamento Assíncrono
+### 13. Processamento Assíncrono
 
 *(omitir se não aplicável)*
 
@@ -326,7 +393,7 @@ Para cada integração:
 
 ---
 
-### 13. Gestão de Erros
+### 14. Gestão de Erros
 
 **Hierarquia de exceções:**
 
@@ -354,7 +421,7 @@ class NotFoundError(AppBaseError):
 
 ---
 
-### 14. Segurança
+### 15. Segurança
 
 - Sanitização de inputs (camadas e abordagem)
 - Proteção contra injeção (SQL, XSS, CSRF — conforme stack)
@@ -367,7 +434,7 @@ class NotFoundError(AppBaseError):
 
 ---
 
-### 15. Observabilidade
+### 16. Observabilidade
 
 **Logging**
 - Formato (JSON estruturado recomendado)
@@ -385,9 +452,9 @@ class NotFoundError(AppBaseError):
 
 ---
 
-### 16. Estratégia de Testes
+### 17. Estratégia de Testes
 
-**16.1 Categorias e ferramentas**
+**17.1 Categorias e ferramentas**
 
 | Categoria | Escopo | Ferramenta | Requer infra externa? |
 |-----------|--------|------------|----------------------|
@@ -395,7 +462,7 @@ class NotFoundError(AppBaseError):
 | Integration | Pipeline completo | pytest / jest | Sim |
 | Smoke | App inicia sem erros | subprocess / playwright | Sim |
 
-**16.2 Fixtures e mocks compartilhados** (`conftest.py` ou equivalente):
+**17.2 Fixtures e mocks compartilhados** (`conftest.py` ou equivalente):
 
 ```python
 # Padrão de mock para dependências externas
@@ -404,13 +471,13 @@ def mock_servico_externo():
     # retorna mock com comportamento esperado
 ```
 
-**16.3 Testes críticos por módulo:**
+**17.3 Testes críticos por módulo:**
 
 | Teste | Módulo | O que verifica |
 |-------|--------|----------------|
 | test_[nome] | [módulo] | [comportamento verificado] |
 
-**16.4 Cobertura mínima por módulo:**
+**17.4 Cobertura mínima por módulo:**
 
 | Módulo | Alvo |
 |--------|------|
@@ -421,9 +488,9 @@ def mock_servico_externo():
 
 ---
 
-### 17. Deploy e Infraestrutura
+### 18. Deploy e Infraestrutura
 
-**17.1 Ambientes**
+**18.1 Ambientes**
 
 | Ambiente | Finalidade | Branch | Auto-deploy |
 |----------|------------|--------|-------------|
@@ -431,18 +498,18 @@ def mock_servico_externo():
 | staging | Homologação | main | Sim |
 | prod | Produção | tags/v* | Manual |
 
-**17.2 CI/CD Pipeline**
+**18.2 CI/CD Pipeline**
 - Etapas: lint → test → build → push → deploy
 - Ferramentas
 - Rollback strategy
 
-**17.3 Infra como código** *(omitir se não aplicável)*
+**18.3 Infra como código** *(omitir se não aplicável)*
 - Ferramenta (Terraform, Pulumi, CDK)
 - Recursos provisionados
 
 ---
 
-### 18. Plano de Rollout
+### 19. Plano de Rollout
 
 - Feature flags: quais features ficam atrás de flag no lançamento
 - Estratégia de rollout gradual (se aplicável)
@@ -450,7 +517,7 @@ def mock_servico_externo():
 
 ---
 
-### 19. Diagramas de Sequência
+### 20. Diagramas de Sequência
 
 Para cada fluxo crítico do PRD, diagrama ASCII com atores, setas e ordem temporal:
 
@@ -484,8 +551,10 @@ Diagramas obrigatórios:
 - [ ] Estado de sessão documentado (se aplicável ao framework)?
 - [ ] Schema de dados completo com CHECK constraints e estratégia de migração?
 - [ ] Máquinas de estado documentadas para entidades com ciclo de vida complexo?
-- [ ] Invariantes do domínio numeradas (INV-XX) com local de verificação?
+- [ ] Invariantes do domínio numeradas (INV-XX) cobrindo os quatro tipos (Invariante, Validação, Transição de Estado, Autorização)?
+- [ ] Sequência de build com passos numerados e checkpoints de validação?
 - [ ] Contratos de APIs externas com campos de request/response?
+- [ ] Tipo de regra declarado em cada RN na lógica de negócio?
 - [ ] Hierarquia de exceções definida com tratamento por tipo?
 - [ ] Segurança coberta (sanitização, rate limit, secrets)?
 - [ ] Fixtures e testes críticos por módulo definidos?
