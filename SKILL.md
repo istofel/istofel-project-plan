@@ -45,10 +45,13 @@ Aplicar em todos os documentos:
 1. Receber ideia/prompt do usuário
 2. Analisar lacunas críticas → perguntar APENAS o essencial (máx. 5 perguntas)
 3. Gerar MVP Scope completo
-4. → "Deseja prosseguir para o PRD?"
-5. Gerar PRD completo
-6. → "Deseja prosseguir para a SPEC?"
-7. Gerar SPEC completo
+4. → Oferecer download do MVP Scope como arquivo .md
+5. → "Deseja prosseguir para o PRD?"
+6. Gerar PRD completo
+7. → Oferecer download do PRD como arquivo .md
+8. → "Deseja prosseguir para a SPEC?"
+9. Gerar SPEC completo
+10. → Oferecer download da SPEC como arquivo .md
 ```
 
 ---
@@ -86,9 +89,42 @@ Sempre que o usuário não mencionar os itens abaixo, sinalizar no documento:
 
 ---
 
+## Entrega de Arquivos .md
+
+Ao finalizar cada documento, além de exibir o conteúdo na conversa, oferecer o download
+do documento como arquivo Markdown. Seguir este comportamento:
+
+**Se a ferramenta `create_file` + `present_files` estiver disponível (Claude com computer use):**
+- Salvar o conteúdo gerado em `/mnt/user-data/outputs/[nome-do-documento].md`
+  - MVP Scope → `mvp-scope.md`
+  - PRD → `prd.md`
+  - SPEC → `spec.md`
+- Chamar `present_files` com o caminho do arquivo para disponibilizar o download ao usuário
+
+**Se `create_file` + `present_files` NÃO estiver disponível (Claude.ai padrão):**
+- Informar ao usuário que o download direto não está disponível no ambiente atual
+- Orientar a copiar o conteúdo do bloco Markdown exibido na conversa e salvar manualmente como `.md`
+
+A oferta de download deve aparecer ANTES da pergunta de continuação para a próxima etapa,
+na seguinte ordem ao finalizar cada documento:
+
+```
+[conteúdo do documento gerado]
+
+📄 O documento está disponível para download acima (ou copie o conteúdo acima e salve como .md).
+
+Deseja prosseguir para o [próximo documento]?
+```
+
+---
+
 ## Etapa 1 — MVP Scope
 
 Consulte `/references/mvp-scope.md` para estrutura completa.
+
+Ao finalizar:
+1. Oferecer download como `mvp-scope.md`
+2. Perguntar — *"Deseja prosseguir para o PRD?"*
 
 ---
 
@@ -98,6 +134,10 @@ Consulte `/references/mvp-scope.md` para estrutura completa.
 
 Consulte `/references/prd.md` para estrutura completa.
 
+Ao finalizar:
+1. Oferecer download como `prd.md`
+2. Perguntar — *"Deseja prosseguir para a SPEC?"*
+
 ---
 
 ## Etapa 3 — SPEC
@@ -105,3 +145,7 @@ Consulte `/references/prd.md` para estrutura completa.
 > Gerar apenas após aprovação explícita do PRD.
 
 Consulte `/references/spec.md` para estrutura completa.
+
+Ao finalizar:
+1. Oferecer download como `spec.md`
+2. Informar que o processo de documentação está completo
