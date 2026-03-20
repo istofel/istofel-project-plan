@@ -181,14 +181,65 @@ ID pattern: [padrão de geração de IDs]
 
 ---
 
-### 7. Contratos de API
+### 7. Máquinas de Estado e Invariantes
 
-**7.1 Convenções gerais**
+*(Incluir quando o produto tiver entidades com ciclo de vida complexo — ex: pedidos, assinaturas, documentos, tarefas. Omitir para entidades simples sem transições de estado.)*
+
+Para cada entidade com estado relevante:
+
+**7.1 Máquina de Estado**
+
+```
+Estados possíveis: [estado_a] | [estado_b] | [estado_c] | [estado_d]
+
+Transições:
+  [estado_a] ──condição──→ [estado_b]
+      efeito colateral: [o que acontece ao transitar]
+
+  [estado_b] ──condição──→ [estado_c]
+      efeito colateral: [o que acontece ao transitar]
+
+  [estado_b] ──condição──→ [estado_a]   ← reversível se aplicável
+      efeito colateral: [o que acontece ao transitar]
+
+  [estado_c] ──condição──→ [estado_d]   ← estado terminal
+      efeito colateral: [o que acontece ao transitar]
+
+Estados terminais: [estado_d] — não permite transição de saída
+```
+
+> Documentar estados terminais explicitamente evita bugs onde o sistema tenta transitar uma entidade já encerrada.
+
+**7.2 Invariantes do Domínio**
+
+Invariantes são verdades absolutas do domínio — nunca podem ser violadas, independentemente de como o sistema chegou àquele estado. Numerar para referência cruzada com testes e regras de negócio.
+
+```
+INV-01: [descrição da invariante — verdade que sempre deve ser verdadeira]
+  Exemplo: "Um pedido no estado 'pago' nunca pode ter valor total = 0"
+  Verificar em: [onde no código esta invariante deve ser checada]
+
+INV-02: [descrição]
+  Exemplo: "Um usuário com plano 'free' nunca pode ter mais de X projetos ativos"
+  Verificar em: [onde no código]
+
+INV-03: [descrição]
+  Exemplo: "Uma assinatura cancelada não pode ser reativada sem novo pagamento"
+  Verificar em: [onde no código]
+```
+
+> Invariantes respondem perguntas como "o que acontece com os registros quando um usuário faz downgrade?" — a resposta deve estar aqui, não ser inferida pelo agente ou desenvolvedor.
+
+---
+
+### 8. Contratos de API
+
+**8.1 Convenções gerais**
 - Base URL, versionamento, autenticação
 - Paginação padrão
 - Formato de erros
 
-**7.2 Endpoints internos** (se o produto expõe API):
+**8.2 Endpoints internos** (se o produto expõe API):
 
 ```
 [MÉTODO] /v1/[recurso]
@@ -206,7 +257,7 @@ Errors:
   429 — rate limit
 ```
 
-**7.3 APIs externas consumidas** — contratos detalhados com request/response/campos de métricas:
+**8.3 APIs externas consumidas** — contratos detalhados com request/response/campos de métricas:
 
 Para cada endpoint externo relevante:
 
@@ -223,7 +274,7 @@ Tratamento de erro: [comportamento em falha / timeout]
 
 ---
 
-### 8. Autenticação e Autorização
+### 9. Autenticação e Autorização
 
 *(omitir se produto single-user local)*
 
@@ -235,7 +286,7 @@ Tratamento de erro: [comportamento em falha / timeout]
 
 ---
 
-### 9. Lógica de Negócio — Implementação
+### 10. Lógica de Negócio — Implementação
 
 Para cada regra crítica do PRD:
 
@@ -254,7 +305,7 @@ Rollback: [se transacional, como reverter em caso de falha]
 
 ---
 
-### 10. Integrações — Implementação Técnica
+### 11. Integrações — Implementação Técnica
 
 Para cada integração:
 
@@ -266,7 +317,7 @@ Para cada integração:
 
 ---
 
-### 11. Processamento Assíncrono
+### 12. Processamento Assíncrono
 
 *(omitir se não aplicável)*
 
@@ -275,7 +326,7 @@ Para cada integração:
 
 ---
 
-### 12. Gestão de Erros
+### 13. Gestão de Erros
 
 **Hierarquia de exceções:**
 
@@ -303,7 +354,7 @@ class NotFoundError(AppBaseError):
 
 ---
 
-### 13. Segurança
+### 14. Segurança
 
 - Sanitização de inputs (camadas e abordagem)
 - Proteção contra injeção (SQL, XSS, CSRF — conforme stack)
@@ -316,7 +367,7 @@ class NotFoundError(AppBaseError):
 
 ---
 
-### 14. Observabilidade
+### 15. Observabilidade
 
 **Logging**
 - Formato (JSON estruturado recomendado)
@@ -334,9 +385,9 @@ class NotFoundError(AppBaseError):
 
 ---
 
-### 15. Estratégia de Testes
+### 16. Estratégia de Testes
 
-**15.1 Categorias e ferramentas**
+**16.1 Categorias e ferramentas**
 
 | Categoria | Escopo | Ferramenta | Requer infra externa? |
 |-----------|--------|------------|----------------------|
@@ -344,7 +395,7 @@ class NotFoundError(AppBaseError):
 | Integration | Pipeline completo | pytest / jest | Sim |
 | Smoke | App inicia sem erros | subprocess / playwright | Sim |
 
-**15.2 Fixtures e mocks compartilhados** (`conftest.py` ou equivalente):
+**16.2 Fixtures e mocks compartilhados** (`conftest.py` ou equivalente):
 
 ```python
 # Padrão de mock para dependências externas
@@ -353,13 +404,13 @@ def mock_servico_externo():
     # retorna mock com comportamento esperado
 ```
 
-**15.3 Testes críticos por módulo:**
+**16.3 Testes críticos por módulo:**
 
 | Teste | Módulo | O que verifica |
 |-------|--------|----------------|
 | test_[nome] | [módulo] | [comportamento verificado] |
 
-**15.4 Cobertura mínima por módulo:**
+**16.4 Cobertura mínima por módulo:**
 
 | Módulo | Alvo |
 |--------|------|
@@ -370,9 +421,9 @@ def mock_servico_externo():
 
 ---
 
-### 16. Deploy e Infraestrutura
+### 17. Deploy e Infraestrutura
 
-**16.1 Ambientes**
+**17.1 Ambientes**
 
 | Ambiente | Finalidade | Branch | Auto-deploy |
 |----------|------------|--------|-------------|
@@ -380,18 +431,18 @@ def mock_servico_externo():
 | staging | Homologação | main | Sim |
 | prod | Produção | tags/v* | Manual |
 
-**16.2 CI/CD Pipeline**
+**17.2 CI/CD Pipeline**
 - Etapas: lint → test → build → push → deploy
 - Ferramentas
 - Rollback strategy
 
-**16.3 Infra como código** *(omitir se não aplicável)*
+**17.3 Infra como código** *(omitir se não aplicável)*
 - Ferramenta (Terraform, Pulumi, CDK)
 - Recursos provisionados
 
 ---
 
-### 17. Plano de Rollout
+### 18. Plano de Rollout
 
 - Feature flags: quais features ficam atrás de flag no lançamento
 - Estratégia de rollout gradual (se aplicável)
@@ -399,7 +450,7 @@ def mock_servico_externo():
 
 ---
 
-### 18. Diagramas de Sequência
+### 19. Diagramas de Sequência
 
 Para cada fluxo crítico do PRD, diagrama ASCII com atores, setas e ordem temporal:
 
@@ -432,6 +483,8 @@ Diagramas obrigatórios:
 - [ ] Cada módulo especificado com assinaturas tipadas e lógica crítica?
 - [ ] Estado de sessão documentado (se aplicável ao framework)?
 - [ ] Schema de dados completo com CHECK constraints e estratégia de migração?
+- [ ] Máquinas de estado documentadas para entidades com ciclo de vida complexo?
+- [ ] Invariantes do domínio numeradas (INV-XX) com local de verificação?
 - [ ] Contratos de APIs externas com campos de request/response?
 - [ ] Hierarquia de exceções definida com tratamento por tipo?
 - [ ] Segurança coberta (sanitização, rate limit, secrets)?
