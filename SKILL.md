@@ -10,17 +10,18 @@ description: >
   crítica ou expansão. Este skill produz documentos técnicos profissionais com análise de mercado,
   decisões de stack, modelagem de dados, regras de negócio, roadmap, user flows, especificação
   por módulo e diagramas de sequência. Sempre gera um documento por vez, solicitando aprovação
-  antes de avançar para o próximo: MVP Scope → PRD → SPEC.
+  antes de avançar para o próximo: MVP Scope → PRD → SPEC → CLAUDE.md.
 ---
 
 # istofel_project_plan
 
 Skill profissional para geração de documentação técnica e estratégica de produto digital.
 
-Produz três documentos em sequência obrigatória:
+Produz quatro documentos em sequência obrigatória:
 1. **MVP Scope** — visão geral técnica e estratégica
 2. **PRD** — requisitos detalhados de produto
 3. **SPEC** — especificação técnica de implementação
+4. **CLAUDE.md** — contexto de sessão personalizado para o agente de IA
 
 **Regra de ouro:** Gerar um documento por vez. Ao finalizar cada um, perguntar explicitamente se o usuário deseja prosseguir para o próximo. Nunca pular etapas.
 
@@ -42,16 +43,20 @@ Aplicar em todos os documentos:
 ## Fluxo de Execução
 
 ```
-1. Receber ideia/prompt do usuário
-2. Analisar lacunas críticas → perguntar APENAS o essencial (máx. 5 perguntas)
-3. Gerar MVP Scope completo
-4. → Oferecer download do MVP Scope como arquivo .md
-5. → "Deseja prosseguir para o PRD?"
-6. Gerar PRD completo
-7. → Oferecer download do PRD como arquivo .md
-8. → "Deseja prosseguir para a SPEC?"
-9. Gerar SPEC completo
+1.  Receber ideia/prompt do usuário
+2.  Analisar lacunas críticas → perguntar APENAS o essencial (máx. 5 perguntas)
+3.  Gerar MVP Scope completo
+4.  → Oferecer download do MVP Scope como arquivo .md
+5.  → "Deseja prosseguir para o PRD?"
+6.  Gerar PRD completo
+7.  → Oferecer download do PRD como arquivo .md
+8.  → "Deseja prosseguir para a SPEC?"
+9.  Gerar SPEC completo
 10. → Oferecer download da SPEC como arquivo .md
+11. → "Deseja prosseguir para o CLAUDE.md?"
+12. Gerar CLAUDE.md personalizado com dados extraídos dos documentos anteriores
+13. → Oferecer download do CLAUDE.md
+14. → Informar que o processo de documentação está completo
 ```
 
 ---
@@ -99,6 +104,7 @@ do documento como arquivo Markdown. Seguir este comportamento:
   - MVP Scope → `mvp-scope.md`
   - PRD → `prd.md`
   - SPEC → `spec.md`
+  - CLAUDE.md → `CLAUDE.md`
 - Chamar `present_files` com o caminho do arquivo para disponibilizar o download ao usuário
 
 **Se `create_file` + `present_files` NÃO estiver disponível (Claude.ai padrão):**
@@ -148,4 +154,34 @@ Consulte `/references/spec.md` para estrutura completa.
 
 Ao finalizar:
 1. Oferecer download como `spec.md`
-2. Informar que o processo de documentação está completo
+2. Perguntar — *"Deseja prosseguir para o CLAUDE.md?"*
+
+---
+
+## Etapa 4 — CLAUDE.md
+
+> Gerar apenas após aprovação explícita da SPEC.
+> Não fazer perguntas ao usuário — todas as informações necessárias já foram coletadas nas etapas anteriores.
+
+Consulte `/references/claude-md.md` para estrutura completa.
+
+O CLAUDE.md é gerado automaticamente a partir dos dados dos três documentos anteriores:
+
+| Seção do CLAUDE.md | Fonte |
+|--------------------|-------|
+| Stack e versões | MVP Scope — seção de stack tecnológica |
+| ADRs fechados | SPEC — seção de ADRs |
+| Estrutura de diretórios | SPEC — seção de estrutura do projeto |
+| Invariantes críticas | SPEC — seção de máquinas de estado e invariantes |
+| Regras de autorização | PRD — regras tipadas como Autorização |
+| Sequência de build | SPEC — seção de sequência de build |
+| Variáveis de ambiente | SPEC — seção de constantes globais |
+| Casos extremos | PRD — seção de edge cases e fora de escopo |
+| Glossário | PRD — glossário |
+
+**Incluir apenas o que for diretamente acionável pelo agente.** Não duplicar conteúdo dos documentos de origem — referenciar quando necessário.
+
+Ao finalizar:
+1. Oferecer download como `CLAUDE.md`
+2. Informar que o processo de documentação está completo:
+   *"Documentação completa: mvp-scope.md · prd.md · spec.md · CLAUDE.md"*
