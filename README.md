@@ -6,7 +6,7 @@
 
 # Istofel Project Plan
 
-A professional Claude skill that guides you through the complete product planning process — from raw idea to implementation-ready documentation — in four structured steps: **MVP Scope → PRD → SPEC → CLAUDE.md**.
+A professional Claude skill that guides you through the complete product planning process — from raw idea to implementation-ready documentation — in three structured steps: **MVP Scope → PRD → SPEC**.
 
 Each document is generated one at a time. Claude asks for your confirmation before moving to the next step, ensuring you review and approve each phase before proceeding.
 
@@ -14,14 +14,13 @@ Each document is generated one at a time. Claude asks for your confirmation befo
 
 ## What It Does
 
-Given a product idea, this skill produces four professional technical documents:
+Given a product idea, this skill produces three professional technical documents:
 
 | Document | Purpose |
 |----------|---------|
 | **MVP Scope** | Market research, competitive landscape, recommended tech stack, architecture overview, data model preview, business rules, monetization, feature roadmap, and risks |
 | **PRD** | Design principles, personas, use case map, functional requirements with typed business rules, UI states, ASCII layout, user flows, feature specification, data schema, sprint roadmap, and global acceptance criteria |
 | **SPEC** | ADRs, module-by-module technical specification with typed signatures, critical logic, state machines, domain invariants, build sequence with checkpoints, sequence diagrams, DB schema with constraints, API contracts, error hierarchy, security, observability, test strategy, and CI/CD pipeline |
-| **CLAUDE.md** | Personalized AI agent context file — auto-generated from the three previous documents with stack, ADRs, invariants, build sequence, prohibited actions, and glossary ready to drop into the project repository |
 
 ---
 
@@ -140,31 +139,6 @@ Claude generates the full SPEC covering:
 - Sequence diagrams for critical flows
 - CI/CD pipeline and environments
 
-After reviewing, Claude asks:
-
-> *"Would you like to proceed to the CLAUDE.md?"*
-
----
-
-### Step 5 — Review the CLAUDE.md
-
-Claude generates a personalized `CLAUDE.md` file automatically — no additional questions needed. All information is extracted from the three previous documents.
-
-The generated `CLAUDE.md` covers:
-
-- **Project overview** — name, one-line description, stack, references to the three docs
-- **Mandatory code patterns** — language conventions, DB access patterns, auth patterns, error handling
-- **What to NEVER do** — explicit prohibition list extracted from ADRs and authorization rules
-- **Fixed stack and versions** — with ADR references; agent treats these as closed decisions
-- **Directory structure** — exactly where to create each type of file
-- **Critical domain invariants** — all INV-XX with type and where to verify in code
-- **Build sequence** — copied from SPEC with current step field for the developer to track
-- **Environment variables** — extracted from SPEC constants section
-- **Answered edge cases** — extracted from PRD to prevent wrong implementations
-- **Domain glossary** — consistent terms to use in code, logs, and comments
-
-Drop `CLAUDE.md` into the root of your project repository. Claude Code loads it automatically at the start of every session.
-
 ---
 
 ## Tips for Best Results
@@ -185,7 +159,7 @@ The more context you give initially, the fewer clarifying questions Claude needs
 
 ### Review before proceeding
 
-Each document builds on the previous one. If something is wrong in the MVP Scope (wrong stack choice, incorrect target audience), it will propagate to the PRD, SPEC, and CLAUDE.md. Take time to review each step.
+Each document builds on the previous one. If something is wrong in the MVP Scope (wrong stack choice, incorrect target audience), it will propagate to the PRD and SPEC. Take time to review each step.
 
 ### Request changes before moving on
 
@@ -198,7 +172,7 @@ I want to use FastAPI instead of Django, and PostgreSQL instead of SQLite.
 
 ### The skill flags what you forgot
 
-Throughout all documents, Claude proactively signals omitted but important items with:
+Throughout all three documents, Claude proactively signals omitted but important items with:
 
 > 💡 **Suggestion:** [explanation of what was missed and why it matters]
 
@@ -284,8 +258,8 @@ ADR-01: FastAPI as backend framework
   Context:  Need async-native Python framework; team is familiar with Python.
             Evaluated Django REST Framework and Flask.
   Decision: FastAPI over Django REST Framework.
-  Rationale: Native async support, automatic OpenAPI docs, Pydantic validation
-             built-in. Django adds ORM and admin overhead not needed here.
+  Motivo:   Native async support, automatic OpenAPI docs, Pydantic validation
+            built-in. Django adds ORM and admin overhead not needed here.
   Consequences: Follow FastAPI dependency injection patterns.
                 Do not use Django ORM or Flask blueprints.
 
@@ -304,6 +278,9 @@ Transitions:
   draft ── user discards ──→ cancelled
       side effect: line items soft-deleted
 
+  finalized ── admin voids ──→ cancelled
+      side effect: credit note generated
+
 Terminal states: cancelled — no further transitions allowed
 
 ### Domain Invariants
@@ -316,45 +293,45 @@ INV-02: [Validation]
   An invoice can only be finalized if it has at least one line item with hours > 0.
   Verify in: InvoiceService.finalize() — check before state transition
 
-INV-03: [Authorization]
+INV-03: [State Transition]
+  Invoice moves from draft to finalized when user confirms; editing is locked immediately.
+  Side effect: sequential number assigned atomically.
+  Verify in: domain state machine — never allow attribute mutation after finalization
+
+INV-04: [Authorization]
   Only the invoice owner or an admin can cancel a finalized invoice.
   Verify in: authorization middleware — before reaching InvoiceService
-```
 
 ---
 
-### CLAUDE.md — excerpt
+## 9. Build Sequence
 
-```markdown
-# CLAUDE.md — InvoiceApp
+STEP 1: Project setup and directory structure
+  What to implement:
+    - Initialize repo, install dependencies, configure linter and formatter
+    - Create src/ structure per section 3
+  Validation checkpoint (must pass before advancing):
+    - App starts without errors
+    - Linter passes with zero warnings
+  Dependencies: none
 
-## 1. Project Overview
-Product: InvoiceApp — freelancer time tracking and invoice generation
-Stack: Python 3.12 + FastAPI + SQLite + PyJWT
-Docs: docs/mvp-scope.md · docs/prd.md · docs/spec.md
+STEP 2: Database and migrations
+  What to implement:
+    - Define full schema per section 7
+    - Run initial migration, verify tables and indexes
+  Validation checkpoint:
+    - All tables created, foreign keys enforced
+    - Migration is idempotent (safe to run twice)
+  Dependencies: Step 1
 
-## 3. What to NEVER Do
-- NEVER create an auth system from scratch — use PyJWT per ADR-02
-- NEVER expose API keys or secrets in code — always via environment variables
-- NEVER use SELECT * — always specify fields
-- NEVER allow editing a finalized invoice — INV-01 prohibits it
-- NEVER advance to the next build step without confirming the checkpoint
-
-## 6. Critical Domain Invariants
-INV-01: [Invariant] A finalized invoice always has a non-null unique number.
-  Verify in: InvoiceRepository.save() — assert before commit
-
-INV-02: [Validation] Invoice can only be finalized with at least one line item with hours > 0.
-  Verify in: InvoiceService.finalize() — before state transition
-
-INV-03: [Authorization] Only owner or admin can cancel a finalized invoice.
-  Verify in: authorization middleware — before InvoiceService
-
-## 7. Build Sequence
-STEP 1: Project setup — checkpoint: app starts, linter passes
-STEP 2: Database and migrations — checkpoint: tables created, idempotent
-STEP 3: Core business logic — checkpoint: invariant tests pass, 80% coverage
-Current step: 1
+STEP 3: Core business logic
+  What to implement:
+    - InvoiceService, TimeEntryRepository with typed signatures
+    - Domain invariants INV-01 through INV-04
+  Validation checkpoint:
+    - Unit tests for all invariants pass
+    - 80% coverage on core/
+  Dependencies: Step 2
 ```
 
 ---
@@ -367,8 +344,7 @@ istofel-project-plan/
 └── references/
     ├── mvp-scope.md                # Complete MVP Scope structure and checklist
     ├── prd.md                      # Complete PRD structure and checklist
-    ├── spec.md                     # Complete SPEC structure and checklist (21 sections)
-    └── claude-md.md                # CLAUDE.md generation rules and structure
+    └── spec.md                     # Complete SPEC structure and checklist (21 sections)
 ```
 
 ---
