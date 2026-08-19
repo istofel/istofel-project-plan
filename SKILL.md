@@ -169,9 +169,12 @@ O CLAUDE.md é gerado automaticamente a partir dos dados dos três documentos an
 
 | Seção do CLAUDE.md | Fonte |
 |--------------------|-------|
-| Stack e versões | MVP Scope — seção de stack tecnológica |
+| Projeto e stack | MVP Scope — seção de stack tecnológica |
+| Comandos de desenvolvimento | SPEC — seção de comandos de desenvolvimento |
+| Padrões de código | SPEC — convenções globais |
 | ADRs fechados | SPEC — seção de ADRs |
 | Estrutura de diretórios | SPEC — seção de estrutura do projeto |
+| Design tokens | SPEC — seção de design tokens (omitir se sem UI) |
 | Invariantes críticas | SPEC — seção de máquinas de estado e invariantes |
 | Regras de autorização | PRD — regras tipadas como Autorização |
 | Sequência de build | SPEC — seção de sequência de build |
