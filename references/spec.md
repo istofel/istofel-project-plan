@@ -106,7 +106,33 @@ projeto/
 
 ---
 
-### 4. Constantes Globais
+### 4. Comandos de Desenvolvimento
+
+Todos os comandos que o desenvolvedor (ou o agente) precisa executar no dia a dia.
+Documentar o comando exato, não a descrição do que ele faz.
+
+| Finalidade | Comando |
+|------------|---------|
+| Setup inicial do ambiente | `[ex: docker compose up -d]` |
+| Instalar dependências | `[ex: npm install]` ou `[ex: pip install -e ".[dev]"]` |
+| Iniciar servidor de desenvolvimento | `[ex: npm run dev]` |
+| Build de produção | `[ex: npm run build]` |
+| Linter | `[ex: npm run lint]` ou `[ex: ruff check src/]` |
+| Formatter | `[ex: npx prettier --write .]` ou `[ex: black src/]` |
+| Testes unitários | `[ex: npm run test:unit]` ou `[ex: pytest tests/unit]` |
+| Testes de integração | `[ex: pytest tests/integration]` |
+| Testes E2E | `[ex: npx playwright test]` |
+| Cobertura de testes | `[ex: npm run test:coverage]` |
+| Migrações de banco | `[ex: supabase db push]` ou `[ex: alembic upgrade head]` |
+| Testes de banco / RLS | `[ex: supabase test db]` |
+| [Comandos específicos do projeto] | |
+
+> Estes comandos são copiados para o CLAUDE.md — o agente os consulta em toda sessão.
+> Documentar o comando literal que funciona, incluindo flags obrigatórias.
+
+---
+
+### 5. Constantes Globais
 
 Arquivo dedicado para todas as constantes e valores padrão:
 
@@ -130,7 +156,7 @@ SUPPORTED_TYPES  = [...]      # descrição
 
 ---
 
-### 5. Especificação por Módulo
+### 6. Especificação por Módulo
 
 Para cada módulo/serviço do projeto:
 
@@ -162,7 +188,48 @@ Notas de framework:
 
 ---
 
-### 6. Estado de Sessão
+### 7. Design Tokens e Identidade Visual
+
+*(Incluir apenas em produtos com interface visual. Omitir para CLI, API pura ou bibliotecas.)*
+
+Valores exatos que o agente deve usar — nunca inventar cores, fontes ou espaçamentos.
+
+**Cores**
+
+| Token | Valor | Uso |
+|-------|-------|-----|
+| `primary` | `#[hex]` | Cor principal da marca — CTAs, links, destaques |
+| `secondary` | `#[hex]` | Acentos e elementos de apoio |
+| `background` | `#[hex]` | Fundo padrão |
+| `surface` | `#[hex]` | Cards, modais, superfícies elevadas |
+| `text-primary` | `#[hex]` | Texto principal |
+| `text-secondary` | `#[hex]` | Texto secundário, legendas |
+| `success` / `warning` / `error` | `#[hex]` | Estados de feedback |
+| [Tokens específicos do domínio] | | [ex: cor de acorde, cor de status] |
+
+**Tipografia**
+
+| Token | Fonte | Uso |
+|-------|-------|-----|
+| `font-heading` | `[nome da fonte]` | Títulos |
+| `font-body` | `[nome da fonte]` | Corpo de texto |
+| `font-mono` | `[nome da fonte]` | Código, dados tabulares |
+
+**Espaçamento e raio**
+- Escala de espaçamento: `[ex: 4px base — 4, 8, 12, 16, 24, 32, 48]`
+- Border radius: `[ex: sm 4px · md 8px · lg 16px]`
+- Breakpoints: `[ex: sm 640 · md 768 · lg 1024 · xl 1280]`
+
+**Onde os tokens vivem no código**
+- `[ex: tailwind.config.ts — theme.extend.colors]`
+- `[ex: src/styles/tokens.css — CSS custom properties]`
+
+> Estes valores são copiados para o CLAUDE.md. Sem eles, o agente hardcoda hex arbitrários
+> e a interface fica inconsistente entre componentes.
+
+---
+
+### 8. Estado de Sessão
 
 Para frameworks com estado de sessão (Streamlit, Chainlit, Redux, Zustand, etc.):
 
@@ -175,7 +242,7 @@ Para frameworks com estado de sessão (Streamlit, Chainlit, Redux, Zustand, etc.
 
 ---
 
-### 7. Modelagem de Dados Completa
+### 9. Modelagem de Dados Completa
 
 **Schema SQL (ou equivalente):**
 
@@ -213,13 +280,13 @@ ID pattern: [padrão de geração de IDs]
 
 ---
 
-### 8. Máquinas de Estado e Invariantes
+### 10. Máquinas de Estado e Invariantes
 
 *(Incluir quando o produto tiver entidades com ciclo de vida complexo — ex: pedidos, assinaturas, documentos, tarefas. Omitir para entidades simples sem transições de estado.)*
 
 Para cada entidade com estado relevante:
 
-**7.1 Máquina de Estado**
+**10.1 Máquina de Estado**
 
 ```
 Estados possíveis: [estado_a] | [estado_b] | [estado_c] | [estado_d]
@@ -242,7 +309,7 @@ Estados terminais: [estado_d] — não permite transição de saída
 
 > Documentar estados terminais explicitamente evita bugs onde o sistema tenta transitar uma entidade já encerrada.
 
-**7.2 Invariantes do Domínio**
+**10.2 Invariantes do Domínio**
 
 Invariantes são verdades absolutas do domínio — nunca podem ser violadas, independentemente de como o sistema chegou àquele estado. Numerar para referência cruzada com testes e regras de negócio.
 
@@ -276,7 +343,7 @@ INV-04: [Autorização]
 
 ---
 
-### 9. Sequência de Build
+### 11. Sequência de Build
 
 > Esta seção é instrução direta para o agente implementar — diferente do sprint roadmap (organização de projeto) e do CI/CD pipeline (infraestrutura de entrega). A sequência de build define a ordem linear de implementação, com checkpoint de validação obrigatório entre cada passo. O agente não deve avançar para o próximo passo sem confirmar que o anterior funciona.
 
@@ -331,14 +398,14 @@ PASSO 6: [nome do passo — ex: Testes e cobertura mínima]
 
 ---
 
-### 10. Contratos de API
+### 12. Contratos de API
 
-**9.1 Convenções gerais**
+**12.1 Convenções gerais**
 - Base URL, versionamento, autenticação
 - Paginação padrão
 - Formato de erros
 
-**9.2 Endpoints internos** (se o produto expõe API):
+**12.2 Endpoints internos** (se o produto expõe API):
 
 ```
 [MÉTODO] /v1/[recurso]
@@ -356,7 +423,7 @@ Errors:
   429 — rate limit
 ```
 
-**9.3 APIs externas consumidas** — contratos detalhados com request/response/campos de métricas:
+**12.3 APIs externas consumidas** — contratos detalhados com request/response/campos de métricas:
 
 Para cada endpoint externo relevante:
 
@@ -373,7 +440,7 @@ Tratamento de erro: [comportamento em falha / timeout]
 
 ---
 
-### 11. Autenticação e Autorização
+### 13. Autenticação e Autorização
 
 *(omitir se produto single-user local)*
 
@@ -385,7 +452,7 @@ Tratamento de erro: [comportamento em falha / timeout]
 
 ---
 
-### 12. Lógica de Negócio — Implementação
+### 14. Lógica de Negócio — Implementação
 
 Para cada regra crítica do PRD:
 
@@ -404,7 +471,7 @@ Rollback: [se transacional, como reverter em caso de falha]
 
 ---
 
-### 13. Integrações — Implementação Técnica
+### 15. Integrações — Implementação Técnica
 
 Para cada integração:
 
@@ -416,7 +483,7 @@ Para cada integração:
 
 ---
 
-### 14. Processamento Assíncrono
+### 16. Processamento Assíncrono
 
 *(omitir se não aplicável)*
 
@@ -425,7 +492,7 @@ Para cada integração:
 
 ---
 
-### 15. Gestão de Erros
+### 17. Gestão de Erros
 
 **Hierarquia de exceções:**
 
@@ -453,7 +520,7 @@ class NotFoundError(AppBaseError):
 
 ---
 
-### 16. Segurança
+### 18. Segurança
 
 - Sanitização de inputs (camadas e abordagem)
 - Proteção contra injeção (SQL, XSS, CSRF — conforme stack)
@@ -466,7 +533,7 @@ class NotFoundError(AppBaseError):
 
 ---
 
-### 17. Observabilidade
+### 19. Observabilidade
 
 **Logging**
 - Formato (JSON estruturado recomendado)
@@ -484,9 +551,9 @@ class NotFoundError(AppBaseError):
 
 ---
 
-### 18. Estratégia de Testes
+### 20. Estratégia de Testes
 
-**17.1 Categorias e ferramentas**
+**20.1 Categorias e ferramentas**
 
 | Categoria | Escopo | Ferramenta | Requer infra externa? |
 |-----------|--------|------------|----------------------|
@@ -494,7 +561,7 @@ class NotFoundError(AppBaseError):
 | Integration | Pipeline completo | pytest / jest | Sim |
 | Smoke | App inicia sem erros | subprocess / playwright | Sim |
 
-**17.2 Fixtures e mocks compartilhados** (`conftest.py` ou equivalente):
+**20.2 Fixtures e mocks compartilhados** (`conftest.py` ou equivalente):
 
 ```python
 # Padrão de mock para dependências externas
@@ -503,13 +570,13 @@ def mock_servico_externo():
     # retorna mock com comportamento esperado
 ```
 
-**17.3 Testes críticos por módulo:**
+**20.3 Testes críticos por módulo:**
 
 | Teste | Módulo | O que verifica |
 |-------|--------|----------------|
 | test_[nome] | [módulo] | [comportamento verificado] |
 
-**17.4 Cobertura mínima por módulo:**
+**20.4 Cobertura mínima por módulo:**
 
 | Módulo | Alvo |
 |--------|------|
@@ -520,9 +587,9 @@ def mock_servico_externo():
 
 ---
 
-### 19. Deploy e Infraestrutura
+### 21. Deploy e Infraestrutura
 
-**18.1 Ambientes**
+**21.1 Ambientes**
 
 | Ambiente | Finalidade | Branch | Auto-deploy |
 |----------|------------|--------|-------------|
@@ -530,18 +597,18 @@ def mock_servico_externo():
 | staging | Homologação | main | Sim |
 | prod | Produção | tags/v* | Manual |
 
-**18.2 CI/CD Pipeline**
+**21.2 CI/CD Pipeline**
 - Etapas: lint → test → build → push → deploy
 - Ferramentas
 - Rollback strategy
 
-**18.3 Infra como código** *(omitir se não aplicável)*
+**21.3 Infra como código** *(omitir se não aplicável)*
 - Ferramenta (Terraform, Pulumi, CDK)
 - Recursos provisionados
 
 ---
 
-### 20. Plano de Rollout
+### 22. Plano de Rollout
 
 - Feature flags: quais features ficam atrás de flag no lançamento
 - Estratégia de rollout gradual (se aplicável)
@@ -549,7 +616,7 @@ def mock_servico_externo():
 
 ---
 
-### 21. Diagramas de Sequência
+### 23. Diagramas de Sequência
 
 Para cada fluxo crítico do PRD, diagrama ASCII com atores, setas e ordem temporal:
 
@@ -579,7 +646,9 @@ Diagramas obrigatórios:
 - [ ] ADRs documentados para cada decisão técnica significativa (stack, ORM, auth, padrão de camadas)?
 - [ ] Diagrama de arquitetura ASCII cobre todos os componentes?
 - [ ] Estrutura de diretórios com responsabilidade por arquivo?
+- [ ] Comandos de desenvolvimento documentados literalmente (dev, build, lint, test, migrações)?
 - [ ] Constantes globais em arquivo dedicado com variáveis de ambiente?
+- [ ] Design tokens definidos com valores exatos (se produto tem UI)?
 - [ ] Cada módulo especificado com assinaturas tipadas e lógica crítica?
 - [ ] Estado de sessão documentado (se aplicável ao framework)?
 - [ ] Schema de dados completo com CHECK constraints e estratégia de migração?
