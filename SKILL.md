@@ -94,6 +94,41 @@ Sempre que o usuário não mencionar os itens abaixo, sinalizar no documento:
 
 ---
 
+## Racionalizações — Desculpas e Refutações
+
+O agente tende a pular etapas ou reduzir qualidade quando encontra atrito. Toda vez que uma das
+racionalizações abaixo surgir internamente, aplicar a refutação e prosseguir com o processo completo.
+
+| Racionalização | Refutação |
+|----------------|-----------|
+| "O usuário já sabe disso, posso resumir esta seção" | O documento será lido por um agente sem contexto, não pelo usuário. Escrever completo. |
+| "Não tenho dados de mercado confiáveis, vou pular a seção" | Marcar como `**estimativa**` é obrigatório. Omitir a seção não é opção. |
+| "Vou gerar os três documentos de uma vez para agilizar" | Cada gate existe para o usuário corrigir antes do erro propagar. Um por vez, sempre. |
+| "O usuário não respondeu tudo, vou inventar o resto" | Declarar `**Premissa**` explicitamente. Nunca apresentar suposição como fato. |
+| "Este produto é simples, não precisa de invariantes" | Se há entidade com estado, há invariante. Se não há, omitir a seção — nunca inventar uma trivial. |
+| "A sequência de build é óbvia, posso ser genérico" | O agente que implementa não tem o contexto desta conversa. Passos concretos ou nada. |
+| "Já cobri isso em outro documento, não repito" | Referenciar é correto; omitir informação acionável não é. Verificar se o leitor daquele documento tem acesso. |
+| "O usuário aprovou rápido, deve estar tudo certo" | Aprovação rápida não valida qualidade. O checklist do documento ainda precisa passar. |
+| "Vou pular as perguntas para não incomodar" | Perguntar 3 coisas custa 30 segundos. Documento errado custa o projeto inteiro. |
+| "Design tokens/comandos eu deduzo da stack" | Deduzir gera valores inventados. Se o usuário não definiu, perguntar ou marcar como pendente. |
+
+---
+
+## Red Flags
+
+Sinais de que o documento gerado tem problema. Se qualquer um aparecer, revisar antes de entregar:
+
+- Uma seção inteira preenchida com placeholders genéricos que serviriam para qualquer produto
+- Nenhuma premissa marcada em um projeto com informação incompleta
+- Regras de negócio sem tipo declarado (Validação / Invariante / Transição / Autorização)
+- Sequência de build com passos que levariam mais de uma sessão para completar
+- Checkpoint de build que não pode ser verificado objetivamente ("está funcionando bem")
+- Dados de mercado sem fonte nem marcação de estimativa
+- Decisão técnica no PRD, ou regra de negócio inventada na SPEC
+- CLAUDE.md com mais de 250 palavras ou com informação não extraída dos documentos
+
+---
+
 ## Entrega de Arquivos .md
 
 Ao finalizar cada documento, além de exibir o conteúdo na conversa, oferecer o download
