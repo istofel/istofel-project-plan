@@ -347,6 +347,27 @@ INV-04: [Autorização]
 
 > Esta seção é instrução direta para o agente implementar — diferente do sprint roadmap (organização de projeto) e do CI/CD pipeline (infraestrutura de entrega). A sequência de build define a ordem linear de implementação, com checkpoint de validação obrigatório entre cada passo. O agente não deve avançar para o próximo passo sem confirmar que o anterior funciona.
 
+**Dimensionamento dos passos**
+
+Cada passo deve ser pequeno o suficiente para ser implementado e validado em uma única sessão de trabalho. Se um passo:
+- toca mais de ~5 arquivos, ou
+- adiciona mais de ~200 linhas de código, ou
+- não pode ser validado sem que outro passo esteja pronto,
+
+então ele é grande demais — quebrar em passos menores. Passos grandes demais fazem o agente perder contexto no meio da implementação e entregar código parcialmente correto.
+
+**Evidência nos checkpoints**
+
+Todo checkpoint exige **evidência concreta e verificável**, nunca avaliação subjetiva. "Parece estar funcionando" não é checkpoint válido.
+
+| Checkpoint inválido | Checkpoint válido |
+|---------------------|-------------------|
+| "App está rodando bem" | `npm run dev` sobe sem erro e responde 200 em `/health` |
+| "Banco configurado" | `[comando de migração]` roda 2× sem erro; tabelas X, Y, Z existem |
+| "Lógica implementada" | `pytest tests/test_[modulo].py` — todos os testes passam |
+| "UI está pronta" | Fluxo UF-01 completo executado manualmente sem erro no console |
+| "Cobertura ok" | `[comando de cobertura]` reporta ≥ [X]% no módulo |
+
 ```
 PASSO 1: [nome do passo — ex: Setup do projeto e estrutura de diretórios]
   O que implementar:
@@ -390,7 +411,7 @@ PASSO 6: [nome do passo — ex: Testes e cobertura mínima]
   O que implementar:
     - [item concreto]
   Checkpoint de validação:
-    - [cobertura mínima atingida — conforme seção 16.4]
+    - [cobertura mínima atingida — conforme seção 20.4]
   Dependências: Todos os passos anteriores
 ```
 
@@ -655,6 +676,8 @@ Diagramas obrigatórios:
 - [ ] Máquinas de estado documentadas para entidades com ciclo de vida complexo?
 - [ ] Invariantes do domínio numeradas (INV-XX) cobrindo os quatro tipos (Invariante, Validação, Transição de Estado, Autorização)?
 - [ ] Sequência de build com passos numerados e checkpoints de validação?
+- [ ] Cada passo de build cabe em uma sessão (≤5 arquivos, ≤200 linhas)?
+- [ ] Todo checkpoint exige evidência concreta (comando + resultado esperado), não avaliação subjetiva?
 - [ ] Contratos de APIs externas com campos de request/response?
 - [ ] Tipo de regra declarado em cada RN na lógica de negócio?
 - [ ] Hierarquia de exceções definida com tratamento por tipo?
