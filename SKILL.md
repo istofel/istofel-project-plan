@@ -94,6 +94,39 @@ Sempre que o usuário não mencionar os itens abaixo, sinalizar no documento:
 
 ---
 
+## Verificação Cruzada Entre Documentos
+
+Cada documento é gerado a partir dos anteriores. Antes de entregar qualquer documento a partir do
+segundo, verificar se ele contradiz algum já aprovado. Contradições silenciosas propagam erro até
+a implementação.
+
+O que verificar, por etapa:
+
+| Ao gerar | Verificar contra | Contradições típicas |
+|----------|------------------|----------------------|
+| PRD | MVP Scope | Feature marcada como MVP no PRD mas listada como "Futuro" no roadmap; persona diferente da definida; monetização divergente |
+| SPEC | MVP Scope + PRD | Stack diferente da recomendada no MVP Scope; endpoint que viola regra de autorização do PRD; entidade no schema que não existe no modelo de dados; passo de build que implementa feature fora de escopo |
+| CLAUDE.md | SPEC + PRD | Comando que não existe na SPEC; invariante reescrita em vez de copiada; stack divergente dos ADRs; proibição sem origem em ADR ou INV |
+
+Se encontrar contradição:
+1. **Não resolver silenciosamente.** Apontar ao usuário antes de entregar o documento.
+2. Indicar os dois pontos em conflito, citando o documento e a seção de cada um.
+3. Perguntar qual prevalece.
+4. Só então gerar o documento com a decisão aplicada.
+
+Formato ao sinalizar:
+
+```
+⚠️ Contradição detectada
+  MVP Scope §3: stack recomendada é [X]
+  Sua instrução atual: usar [Y]
+  Qual prevalece?
+```
+
+> Se nenhuma contradição for encontrada, não mencionar a verificação — apenas entregar o documento.
+
+---
+
 ## Racionalizações — Desculpas e Refutações
 
 O agente tende a pular etapas ou reduzir qualidade quando encontra atrito. Toda vez que uma das
@@ -218,6 +251,19 @@ O CLAUDE.md é gerado automaticamente a partir dos dados dos três documentos an
 | Glossário | PRD — glossário |
 
 **Incluir apenas o que for diretamente acionável pelo agente.** Não duplicar conteúdo dos documentos de origem — referenciar quando necessário.
+
+**Seção fixa de execução.** Além das seções extraídas dos documentos, todo CLAUDE.md gerado inclui
+esta seção literal — ela corrige falhas de comportamento comuns em agentes de código e não depende
+do projeto:
+
+```
+## Execução
+- Toque apenas no que o pedido exige — não refatore, reformate nem "melhore" código adjacente
+- Remova só os órfãos que suas mudanças criaram; código morto pré-existente, apenas mencione
+- Ambiguidade: declare o que está confuso e pergunte antes de implementar
+- Interpretações múltiplas: apresente-as, não escolha em silêncio
+- Combine com o estilo existente do arquivo, mesmo que você faria diferente
+```
 
 Ao finalizar:
 1. Oferecer download como `CLAUDE.md`
