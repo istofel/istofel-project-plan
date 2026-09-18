@@ -163,6 +163,26 @@ Fluxos obrigatórios:
 - UF-03: Fluxo com dado/arquivo externo (se aplicável)
 - UF-04: Fluxo de configuração ou troca de contexto
 
+**7.1 Estados por ação**
+
+Além dos estados de tela (seção 6.3), especificar o ciclo completo de cada ação que o usuário
+dispara. Sem isso, o agente implementa o botão sem saber o que acontece entre o clique e o resultado.
+
+Para cada ação relevante (envio de formulário, upload, exclusão, confirmação, busca):
+
+```
+Ação: [nome — ex: Finalizar pedido]
+  Gatilho:       [o que dispara — clique no botão X, Enter no campo Y]
+  Validação:     [o que é checado antes de executar] → [mensagem se falhar]
+  Loading:       [o que o usuário vê enquanto processa — spinner no botão, skeleton, barra]
+  Sucesso:       [feedback visual] → [para onde vai — mesma tela, redirect, modal]
+  Erro:          [mensagem exibida] → [o que o usuário pode fazer — retry, corrigir campo, cancelar]
+  Estado do UI:  [o que fica desabilitado durante a execução]
+```
+
+> Especificar por ação, não só por tela. Uma tela em estado "pronto" pode ter cinco ações, cada
+> uma com seu próprio ciclo de loading e erro.
+
 ---
 
 ### 8. Especificação de Features
@@ -303,6 +323,7 @@ O MVP é considerado completo quando:
 - [ ] Tratamento de erros definido por feature?
 - [ ] Estados da tela documentados (incluindo vazios e erros)?
 - [ ] User flows cobrem onboarding e happy path com ramificações de erro?
+- [ ] Cada ação do usuário tem gatilho, validação, loading, sucesso, erro e destino especificados?
 - [ ] Especificação de features detalha componentes, regras tipadas e limitações do MVP?
 - [ ] Schema de dados com índices, constraints e estratégia de migração?
 - [ ] Requisitos de instalação/distribuição cobertos (se aplicável)?
