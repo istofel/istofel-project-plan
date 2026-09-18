@@ -1,7 +1,7 @@
 # CLAUDE.md — Referência de Geração
 
 > Gerar automaticamente a partir dos três documentos anteriores. Sem perguntas ao usuário.
-> Meta: menos de 250 palavras no arquivo gerado. Incluir apenas o que for diretamente acionável.
+> Meta: menos de 300 palavras no arquivo gerado (a seção fixa de Execução consome ~50). Incluir apenas o que for diretamente acionável.
 > Omitir seções sem dados reais (ex: auth em produto single-user, design tokens em CLI, env vars se não houver).
 
 ---
@@ -58,11 +58,26 @@
 **Seção 12 — Glossário** *(extrair do PRD — glossário; omitir se trivial)*
 - Tabela: Termo | Usar como | NÃO usar
 
+**Seção 13 — Execução** *(seção fixa — copiar literalmente em todo projeto)*
+
+```
+## Execução
+- Toque apenas no que o pedido exige — não refatore, reformate nem "melhore" código adjacente
+- Remova só os órfãos que suas mudanças criaram; código morto pré-existente, apenas mencione
+- Ambiguidade: declare o que está confuso e pergunte antes de implementar
+- Interpretações múltiplas: apresente-as, não escolha em silêncio
+- Combine com o estilo existente do arquivo, mesmo que você faria diferente
+```
+
+> Esta é a única seção não extraída dos documentos. Ela corrige falhas de comportamento
+> recorrentes em agentes de código e vale para qualquer projeto.
+
 ---
 
 ## Checklist de qualidade — CLAUDE.md
 
-- [ ] Menos de 250 palavras no arquivo gerado?
+- [ ] Menos de 300 palavras no arquivo gerado?
+- [ ] Seção fixa de Execução copiada literalmente?
 - [ ] Comandos de desenvolvimento copiados literalmente da SPEC?
 - [ ] Toda informação extraída dos documentos (sem invenção)?
 - [ ] Seções sem dados reais foram omitidas?
