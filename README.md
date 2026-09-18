@@ -10,6 +10,8 @@ A professional Claude skill that guides you through the complete product plannin
 
 Each document is generated one at a time. Claude asks for your confirmation before moving to the next step, ensuring you review and approve each phase before proceeding.
 
+Before delivering each document, Claude cross-checks it against the previously approved ones and flags any contradiction — a stack that diverges from the MVP Scope, an endpoint that violates a PRD authorization rule, a build step implementing an out-of-scope feature. Contradictions are surfaced for you to resolve, never silently reconciled.
+
 ---
 
 ## What It Does
@@ -104,6 +106,7 @@ Claude generates the full PRD covering:
 - ASCII layout of the main interface
 - Screen states (offline, empty, loading, error, ready)
 - User flows as pseudoflowcharts (onboarding, happy path, etc.)
+- **Per-action states** — for every user action: trigger, validation, loading, success, error, and destination
 - Feature specification with components, typed rules, and MVP limitations
 - Complete data schema with indexes and migration strategy
 - Sprint roadmap
@@ -132,7 +135,7 @@ Claude generates the full SPEC covering:
 - Session state documentation
 - Complete SQL schema with CHECK constraints and migration strategy
 - **State machines and domain invariants** — for entities with complex lifecycles: state transitions with side effects, terminal states, and four types of invariants (Invariant, Validation, State Transition, Authorization)
-- **Build sequence** — numbered linear steps with concrete implementation items and mandatory validation checkpoints; the agent must not advance to the next step without confirming the previous one works
+- **Build sequence** — numbered linear steps sized to fit a single session (≤5 files, ≤200 lines), each with a checkpoint requiring concrete evidence (a command and its expected result), never subjective assessment; the agent must not advance without confirming the previous step works
 - API contracts (internal endpoints + external APIs consumed)
 - Error hierarchy with UI handling per exception type
 - Security checklist (sanitization, rate limiting, secrets management)
@@ -247,6 +250,18 @@ These cover: data retention policy, LGPD/GDPR compliance, observability setup, i
 | Loading    | Fetching invoice list      | Skeleton rows                                     |
 | Ready      | Data loaded                | Invoice list with filters                         |
 | Error      | API failure                | Banner: "Could not load invoices. Try again."     |
+
+---
+
+## 7.1 Per-Action States
+
+Action: Finalize invoice
+  Trigger:    Click "Finalize" on a draft invoice
+  Validation: At least one line item with hours > 0 → else inline error on the items table
+  Loading:    Spinner replaces button label; line items become read-only
+  Success:    Toast "Invoice INV-2026-0042 finalized" → stay on page, switch to locked view
+  Error:      Banner with server message → retry button, draft preserved
+  UI state:   Finalize, Edit and Delete disabled during execution
 ```
 
 ---
@@ -308,22 +323,25 @@ INV-04: [Authorization]
 
 ## 9. Build Sequence
 
+Each step fits a single session: ≤5 files, ≤200 lines.
+Every checkpoint requires concrete evidence — a command and its expected result.
+
 STEP 1: Project setup and directory structure
   What to implement:
     - Initialize repo, install dependencies, configure linter and formatter
     - Create src/ structure per section 3
   Validation checkpoint (must pass before advancing):
-    - App starts without errors
-    - Linter passes with zero warnings
+    - `uvicorn src.main:app` starts and returns 200 on /health
+    - `ruff check src/` reports zero warnings
   Dependencies: none
 
 STEP 2: Database and migrations
   What to implement:
-    - Define full schema per section 7
+    - Define full schema per section 9
     - Run initial migration, verify tables and indexes
   Validation checkpoint:
-    - All tables created, foreign keys enforced
-    - Migration is idempotent (safe to run twice)
+    - `alembic upgrade head` runs twice without error (idempotent)
+    - Tables invoices, line_items, clients exist with foreign keys enforced
   Dependencies: Step 1
 
 STEP 3: Core business logic
@@ -331,9 +349,50 @@ STEP 3: Core business logic
     - InvoiceService, TimeEntryRepository with typed signatures
     - Domain invariants INV-01 through INV-04
   Validation checkpoint:
-    - Unit tests for all invariants pass
-    - 80% coverage on core/
+    - `pytest tests/test_invoice.py` — all tests pass
+    - `pytest --cov=src/core` reports ≥80%
   Dependencies: Step 2
+```
+
+---
+
+### CLAUDE.md — excerpt
+
+```markdown
+# CLAUDE.md — InvoiceApp
+
+## 1. Project
+InvoiceApp — freelancer time tracking and invoice generation
+Stack: Python 3.12 · FastAPI · SQLite · PyJWT
+Docs: docs/mvp-scope.md · docs/prd.md · docs/spec.md
+
+## 2. Commands
+Dev: `uvicorn src.main:app --reload` · Build: `docker build -t invoiceapp .`
+Lint: `ruff check src/` · Format: `black src/` · Test: `pytest`
+Migrations: `alembic upgrade head`
+
+## 4. NEVER
+- NEVER build auth from scratch — PyJWT per ADR-02
+- NEVER allow editing a finalized invoice — INV-01
+- NEVER use SELECT * — always specify fields
+- NEVER advance a build step without its checkpoint evidence
+- When you make a mistake, record the correction here
+
+## 8. Invariants
+INV-01 [Inv] Finalized invoice has non-null unique number · InvoiceRepository.save()
+INV-02 [Val] Finalize requires ≥1 line item with hours > 0 · InvoiceService.finalize()
+INV-03 [Autz] Only owner or admin cancels a finalized invoice · auth middleware
+
+## 9. Build
+1 Setup ✔ /health 200 · 2 Migrations ✔ idempotent · 3 Core ✔ pytest + 80%
+Current step: 1
+
+## 13. Execution
+- Touch only what the request requires — do not refactor or reformat adjacent code
+- Remove only the orphans your changes created; pre-existing dead code, just mention it
+- Ambiguity: state what is unclear and ask before implementing
+- Multiple interpretations: present them, do not pick silently
+- Match the existing style of the file, even if you would do it differently
 ```
 
 ---
