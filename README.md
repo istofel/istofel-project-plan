@@ -1,28 +1,29 @@
 <p align="center">
-    <img src="docs/banner/pppok_new.png" width="900px">
+    <img src="docs/banner/pppok.png" width="900px">
 </p>
 
 <hr/>
 
 # Istofel Project Plan
 
-A professional Claude skill that guides you through the complete product planning process, from raw idea to implementation-ready documentation, in three structured steps: **MVP Scope → PRD → SPEC**.
+A professional Claude skill that guides you through the complete product planning process — from raw idea to implementation-ready documentation — in four structured steps: **MVP Scope → PRD → SPEC → CLAUDE.md**.
 
 Each document is generated one at a time. Claude asks for your confirmation before moving to the next step, ensuring you review and approve each phase before proceeding.
 
-Before delivering each document, Claude cross-checks it against the previously approved ones and flags any contradiction, a stack that diverges from the MVP Scope, an endpoint that violates a PRD authorization rule, a build step implementing an out-of-scope feature. Contradictions are surfaced for you to resolve, never silently reconciled.
+Before delivering each document, Claude cross-checks it against the previously approved ones and flags any contradiction — a stack that diverges from the MVP Scope, an endpoint that violates a PRD authorization rule, a build step implementing an out-of-scope feature. Contradictions are surfaced for you to resolve, never silently reconciled.
 
 ---
 
 ## What It Does
 
-Given a product idea, this skill produces three professional technical documents:
+Given a product idea, this skill produces four professional technical documents:
 
 | Document | Purpose |
 |----------|---------|
 | **MVP Scope** | Market research, competitive landscape, recommended tech stack, architecture overview, data model preview, business rules, monetization, feature roadmap, and risks |
 | **PRD** | Design principles, personas, use case map, functional requirements with typed business rules, UI states, ASCII layout, user flows, feature specification, data schema, sprint roadmap, and global acceptance criteria |
 | **SPEC** | ADRs, module-by-module technical specification with typed signatures, critical logic, state machines, domain invariants, build sequence with checkpoints, sequence diagrams, DB schema with constraints, API contracts, error hierarchy, security, observability, test strategy, and CI/CD pipeline |
+| **CLAUDE.md** | Personalized AI agent context file, auto-generated from the three previous documents: development commands, fixed stack with ADR references, directory structure, design tokens, domain invariants, build sequence, environment variables, edge cases, glossary, and execution rules. Under 300 words, ready to drop into the project repository |
 
 ---
 
@@ -50,7 +51,7 @@ On the repository page, click **Code → Download ZIP**.
 
 ## How to Use
 
-### Step 1 - Start with your idea
+### Step 1 — Start with your idea
 
 Trigger the skill by describing your product. You can be as brief or detailed as you like. The skill will ask clarifying questions if critical information is missing.
 
@@ -72,7 +73,7 @@ Claude will ask up to 5 focused questions if anything critical is missing (targe
 
 ---
 
-### Step 2 - Review the MVP Scope
+### Step 2 — Review the MVP Scope
 
 Claude generates the full MVP Scope document covering:
 
@@ -95,7 +96,7 @@ Reply **yes** to continue or request changes first.
 
 ---
 
-### Step 3 - Review the PRD
+### Step 3 — Review the PRD
 
 Claude generates the full PRD covering:
 
@@ -106,7 +107,7 @@ Claude generates the full PRD covering:
 - ASCII layout of the main interface
 - Screen states (offline, empty, loading, error, ready)
 - User flows as pseudoflowcharts (onboarding, happy path, etc.)
-- **Per-action states** - for every user action: trigger, validation, loading, success, error, and destination
+- **Per-action states** — for every user action: trigger, validation, loading, success, error, and destination
 - Feature specification with components, typed rules, and MVP limitations
 - Complete data schema with indexes and migration strategy
 - Sprint roadmap
@@ -121,21 +122,21 @@ After reviewing, Claude asks:
 
 ---
 
-### Step 4 - Review the SPEC
+### Step 4 — Review the SPEC
 
 Claude generates the full SPEC covering:
 
-- **ADRs (Architecture Decision Records)** - each significant technical decision documented with context, decision, rationale, and consequences; the agent treats ADRs as closed decisions and does not revisit them
+- **ADRs (Architecture Decision Records)** — each significant technical decision documented with context, decision, rationale, and consequences; the agent treats ADRs as closed decisions and does not revisit them
 - Architecture diagram with layers and protocols
 - Project directory tree with per-file responsibility
-- **Development commands** - literal commands for setup, dev server, build, lint, tests, and migrations
+- **Development commands** — literal commands for setup, dev server, build, lint, tests, and migrations
 - Global constants and environment variables
-- **Design tokens** - exact brand colors, semantic colors, typography, spacing scale (omitted for CLI/API products)
+- **Design tokens** — exact brand colors, semantic colors, typography, spacing scale (omitted for CLI/API products)
 - Module-by-module specification (typed signatures, critical logic, framework notes)
 - Session state documentation
 - Complete SQL schema with CHECK constraints and migration strategy
-- **State machines and domain invariants** - for entities with complex lifecycles: state transitions with side effects, terminal states, and four types of invariants (Invariant, Validation, State Transition, Authorization)
-- **Build sequence** - numbered linear steps sized to fit a single session (≤5 files, ≤200 lines), each with a checkpoint requiring concrete evidence (a command and its expected result), never subjective assessment; the agent must not advance without confirming the previous step works
+- **State machines and domain invariants** — for entities with complex lifecycles: state transitions with side effects, terminal states, and four types of invariants (Invariant, Validation, State Transition, Authorization)
+- **Build sequence** — numbered linear steps sized to fit a single session (≤5 files, ≤200 lines), each with a checkpoint requiring concrete evidence (a command and its expected result), never subjective assessment; the agent must not advance without confirming the previous step works
 - API contracts (internal endpoints + external APIs consumed)
 - Error hierarchy with UI handling per exception type
 - Security checklist (sanitization, rate limiting, secrets management)
@@ -143,6 +144,36 @@ Claude generates the full SPEC covering:
 - Test strategy with fixtures, critical tests per module, and coverage targets
 - Sequence diagrams for critical flows
 - CI/CD pipeline and environments
+
+After reviewing, Claude asks:
+
+> *"Would you like to proceed to the CLAUDE.md?"*
+
+---
+
+### Step 5 — Review the CLAUDE.md
+
+Claude generates a personalized `CLAUDE.md` file automatically — no additional questions needed. Every value is extracted from the three previous documents, never invented.
+
+The generated `CLAUDE.md` covers:
+
+- **Project overview** — name, one-line description, stack, paths to the three docs
+- **Development commands** — literal commands for setup, dev, build, lint, format, tests, and migrations, ready to run
+- **Mandatory code patterns** — language conventions, file naming, ID and timestamp format, error base class, DB and API access patterns
+- **What to NEVER do** — explicit prohibitions, each traced back to the ADR or invariant that originates it, plus a standing instruction to record corrections whenever the agent makes a mistake
+- **Fixed stack and versions** — with ADR references; the agent treats these as closed decisions and does not propose alternatives
+- **Directory structure** — first-level folders with responsibility, so the agent knows where to create each file
+- **Design tokens** — brand and semantic colors, fonts, spacing scale (omitted for CLI, API, or library products)
+- **Critical domain invariants** — every INV-XX in compact form with its type and where to verify it in code
+- **Build sequence** — steps with checkpoints, plus a current-step field for the developer to track progress
+- **Environment variables** — name, default, and whether required
+- **Answered edge cases** — situations the agent would otherwise implement wrong
+- **Domain glossary** — the term to use in code versus the ones to avoid
+- **Execution rules** — a fixed section in every generated file: touch only what the request requires, never refactor adjacent code, remove only the orphans your own changes created, declare ambiguity instead of guessing, present multiple interpretations rather than picking silently
+
+The file is kept under 300 words. Since Claude Code loads it at the start of every session, every token it costs is spent before you even type your prompt — so it carries only what changes the agent's behavior.
+
+Drop `CLAUDE.md` into the root of your project repository.
 
 ---
 
@@ -164,14 +195,14 @@ The more context you give initially, the fewer clarifying questions Claude needs
 
 ### Review before proceeding
 
-Each document builds on the previous one. If something is wrong in the MVP Scope (wrong stack choice, incorrect target audience), it will propagate to the PRD and SPEC. Take time to review each step.
+Each document builds on the previous one. If something is wrong in the MVP Scope (wrong stack choice, incorrect target audience), it will propagate to the PRD, SPEC, and CLAUDE.md. Take time to review each step.
 
 ### Request changes before moving on
 
 You can ask Claude to revise any section before confirming to proceed. For example:
 
 ```
-Before we move to the PRD, please revise the tech stack section - 
+Before we move to the PRD, please revise the tech stack section — 
 I want to use FastAPI instead of Django, and PostgreSQL instead of SQLite.
 ```
 
@@ -187,7 +218,7 @@ These cover: data retention policy, LGPD/GDPR compliance, observability setup, i
 
 ## Document Examples
 
-### MVP Scope - excerpt
+### MVP Scope — excerpt
 
 ```markdown
 ## 3. Recommended Tech Stack
@@ -205,7 +236,7 @@ These cover: data retention policy, LGPD/GDPR compliance, observability setup, i
 
 | Feature              | Priority       | Complexity | Dependencies     |
 |----------------------|----------------|------------|------------------|
-| User auth (JWT)      | Essential MVP  | Medium     | -                |
+| User auth (JWT)      | Essential MVP  | Medium     | —                |
 | Dashboard overview   | Essential MVP  | Medium     | Auth             |
 | Invoice generation   | Essential MVP  | High       | Dashboard        |
 | PDF export           | Post-MVP v1    | Medium     | Invoice          |
@@ -215,7 +246,7 @@ These cover: data retention policy, LGPD/GDPR compliance, observability setup, i
 
 ---
 
-### PRD - excerpt
+### PRD — excerpt
 
 ```markdown
 ## RF-03: Invoice Generation
@@ -266,10 +297,10 @@ Action: Finalize invoice
 
 ---
 
-### SPEC - excerpt
+### SPEC — excerpt
 
 ```markdown
-## 2. ADRs - Architecture Decision Records
+## 2. ADRs — Architecture Decision Records
 
 ADR-01: FastAPI as backend framework
   Context:  Need async-native Python framework; team is familiar with Python.
@@ -284,7 +315,7 @@ ADR-01: FastAPI as backend framework
 
 ## 8. State Machines and Domain Invariants
 
-### Invoice - State Machine
+### Invoice — State Machine
 
 States: draft | finalized | cancelled
 
@@ -298,33 +329,33 @@ Transitions:
   finalized ── admin voids ──→ cancelled
       side effect: credit note generated
 
-Terminal states: cancelled - no further transitions allowed
+Terminal states: cancelled — no further transitions allowed
 
 ### Domain Invariants
 
 INV-01: [Invariant]
   A finalized invoice always has a non-null, unique invoice number.
-  Verify in: invoice repository save() - assert before commit
+  Verify in: invoice repository save() — assert before commit
 
 INV-02: [Validation]
   An invoice can only be finalized if it has at least one line item with hours > 0.
-  Verify in: InvoiceService.finalize() - check before state transition
+  Verify in: InvoiceService.finalize() — check before state transition
 
 INV-03: [State Transition]
   Invoice moves from draft to finalized when user confirms; editing is locked immediately.
   Side effect: sequential number assigned atomically.
-  Verify in: domain state machine - never allow attribute mutation after finalization
+  Verify in: domain state machine — never allow attribute mutation after finalization
 
 INV-04: [Authorization]
   Only the invoice owner or an admin can cancel a finalized invoice.
-  Verify in: authorization middleware - before reaching InvoiceService
+  Verify in: authorization middleware — before reaching InvoiceService
 
 ---
 
 ## 9. Build Sequence
 
 Each step fits a single session: ≤5 files, ≤200 lines.
-Every checkpoint requires concrete evidence - a command and its expected result.
+Every checkpoint requires concrete evidence — a command and its expected result.
 
 STEP 1: Project setup and directory structure
   What to implement:
@@ -349,20 +380,20 @@ STEP 3: Core business logic
     - InvoiceService, TimeEntryRepository with typed signatures
     - Domain invariants INV-01 through INV-04
   Validation checkpoint:
-    - `pytest tests/test_invoice.py` - all tests pass
+    - `pytest tests/test_invoice.py` — all tests pass
     - `pytest --cov=src/core` reports ≥80%
   Dependencies: Step 2
 ```
 
 ---
 
-### CLAUDE.md - excerpt
+### CLAUDE.md — excerpt
 
 ```markdown
-# CLAUDE.md - InvoiceApp
+# CLAUDE.md — InvoiceApp
 
 ## 1. Project
-InvoiceApp - freelancer time tracking and invoice generation
+InvoiceApp — freelancer time tracking and invoice generation
 Stack: Python 3.12 · FastAPI · SQLite · PyJWT
 Docs: docs/mvp-scope.md · docs/prd.md · docs/spec.md
 
@@ -372,9 +403,9 @@ Lint: `ruff check src/` · Format: `black src/` · Test: `pytest`
 Migrations: `alembic upgrade head`
 
 ## 4. NEVER
-- NEVER build auth from scratch - PyJWT per ADR-02
-- NEVER allow editing a finalized invoice - INV-01
-- NEVER use SELECT * - always specify fields
+- NEVER build auth from scratch — PyJWT per ADR-02
+- NEVER allow editing a finalized invoice — INV-01
+- NEVER use SELECT * — always specify fields
 - NEVER advance a build step without its checkpoint evidence
 - When you make a mistake, record the correction here
 
@@ -388,7 +419,7 @@ INV-03 [Autz] Only owner or admin cancels a finalized invoice · auth middleware
 Current step: 1
 
 ## 13. Execution
-- Touch only what the request requires - do not refactor or reformat adjacent code
+- Touch only what the request requires — do not refactor or reformat adjacent code
 - Remove only the orphans your changes created; pre-existing dead code, just mention it
 - Ambiguity: state what is unclear and ask before implementing
 - Multiple interpretations: present them, do not pick silently
@@ -405,13 +436,14 @@ istofel-project-plan/
 └── references/
     ├── mvp-scope.md                # Complete MVP Scope structure and checklist
     ├── prd.md                      # Complete PRD structure and checklist
-    └── spec.md                     # Complete SPEC structure and checklist (23 sections)
+    ├── spec.md                     # Complete SPEC structure and checklist (23 sections)
+    └── claude-md.md                # CLAUDE.md generation rules, section sources, and word limit
 ```
 
 ---
 
 ## License
 
-MIT License - Copyright (c) 2026 Vinícius Istofel Oliveira.
+MIT License — Copyright (c) 2026 Vinícius Istofel Oliveira.
 
 See [LICENSE](LICENSE) for full text.
