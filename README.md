@@ -1,5 +1,5 @@
 <p align="center">
-    <img src="docs/banner/pppok.png" width="900px">
+    <img src="docs/banner/pppok_full.png" width="900px">
 </p>
 
 <hr/>
