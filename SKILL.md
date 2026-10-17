@@ -106,7 +106,7 @@ O que verificar, por etapa:
 |----------|------------------|----------------------|
 | PRD | MVP Scope | Feature marcada como MVP no PRD mas listada como "Futuro" no roadmap; persona diferente da definida; monetização divergente |
 | SPEC | MVP Scope + PRD | Stack diferente da recomendada no MVP Scope; endpoint que viola regra de autorização do PRD; entidade no schema que não existe no modelo de dados; passo de build que implementa feature fora de escopo |
-| CLAUDE.md | SPEC + PRD | Comando que não existe na SPEC; invariante reescrita em vez de copiada; stack divergente dos ADRs; proibição sem origem em ADR ou INV |
+| CLAUDE.md | SPEC + PRD | Comando que não existe na SPEC; invariante com sentido diferente da SPEC; proibição de stack divergente dos ADRs; proibição sem origem em ADR ou INV |
 
 Se encontrar contradição:
 1. **Não resolver silenciosamente.** Apontar ao usuário antes de entregar o documento.
@@ -144,6 +144,7 @@ racionalizações abaixo surgir internamente, aplicar a refutação e prosseguir
 | "O usuário aprovou rápido, deve estar tudo certo" | Aprovação rápida não valida qualidade. O checklist do documento ainda precisa passar. |
 | "Vou pular as perguntas para não incomodar" | Perguntar 3 coisas custa 30 segundos. Documento errado custa o projeto inteiro. |
 | "Design tokens/comandos eu deduzo da stack" | Deduzir gera valores inventados. Se o usuário não definiu, perguntar ou marcar como pendente. |
+| "Vou pôr a estrutura de diretórios e a stack no CLAUDE.md para o agente se orientar" | Visões gerais não ajudam o agente a achar arquivos mais rápido e geram passos extras. Ele lê o código e a SPEC. No CLAUDE.md, só o que não é descobrível. |
 
 ---
 
@@ -158,7 +159,7 @@ Sinais de que o documento gerado tem problema. Se qualquer um aparecer, revisar 
 - Checkpoint de build que não pode ser verificado objetivamente ("está funcionando bem")
 - Dados de mercado sem fonte nem marcação de estimativa
 - Decisão técnica no PRD, ou regra de negócio inventada na SPEC
-- CLAUDE.md com mais de 250 palavras ou com informação não extraída dos documentos
+- CLAUDE.md com mais de 200 palavras, com informação não extraída dos documentos, ou repetindo o que é descobrível no código (diretórios, stack, env vars, tokens, comandos padrão)
 
 ---
 
@@ -237,20 +238,20 @@ O CLAUDE.md é gerado automaticamente a partir dos dados dos três documentos an
 
 | Seção do CLAUDE.md | Fonte |
 |--------------------|-------|
-| Projeto e stack | MVP Scope — seção de stack tecnológica |
-| Comandos de desenvolvimento | SPEC — seção de comandos de desenvolvimento |
-| Padrões de código | SPEC — convenções globais |
-| ADRs fechados | SPEC — seção de ADRs |
-| Estrutura de diretórios | SPEC — seção de estrutura do projeto |
-| Design tokens | SPEC — seção de design tokens (omitir se sem UI) |
-| Invariantes críticas | SPEC — seção de máquinas de estado e invariantes |
-| Regras de autorização | PRD — regras tipadas como Autorização |
+| Projeto e ponteiros para docs | MVP Scope — visão geral |
+| Comandos fora do padrão | SPEC — seção de comandos de desenvolvimento |
+| Regras não óbvias | SPEC — convenções globais e ADRs |
+| NUNCA (inclui decisões de stack reversíveis) | SPEC — ADRs · PRD — regras de Autorização |
+| Invariantes | SPEC — seção de máquinas de estado e invariantes |
+| Casos extremos | PRD — casos extremos e fora de escopo |
 | Sequência de build | SPEC — seção de sequência de build |
-| Variáveis de ambiente | SPEC — seção de constantes globais |
-| Casos extremos | PRD — seção de edge cases e fora de escopo |
-| Glossário | PRD — glossário |
+| Glossário (só termos ambíguos) | PRD — glossário |
 
-**Incluir apenas o que for diretamente acionável pelo agente.** Não duplicar conteúdo dos documentos de origem — referenciar quando necessário.
+**Incluir apenas o que o agente não consegue descobrir sozinho.** Teste de cada linha: o agente
+erraria sem ela, mesmo podendo ler o código e a pasta `docs/`? Se não, cortar. Árvore de diretórios,
+tabela de stack, lista de variáveis de ambiente, design tokens e comandos padrão do ecossistema não
+entram — já estão no código, nos arquivos de config ou na SPEC. O CLAUDE.md aponta para eles em
+uma linha, não os repete. Alvo ~150 palavras, teto 200.
 
 **Seção fixa de execução.** Além das seções extraídas dos documentos, todo CLAUDE.md gerado inclui
 esta seção literal — ela corrige falhas de comportamento comuns em agentes de código e não depende

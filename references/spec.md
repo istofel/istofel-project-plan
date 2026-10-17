@@ -127,8 +127,9 @@ Documentar o comando exato, não a descrição do que ele faz.
 | Testes de banco / RLS | `[ex: supabase test db]` |
 | [Comandos específicos do projeto] | |
 
-> Estes comandos são copiados para o CLAUDE.md — o agente os consulta em toda sessão.
 > Documentar o comando literal que funciona, incluindo flags obrigatórias.
+> Apenas os comandos fora do padrão do ecossistema são copiados para o CLAUDE.md; os demais o agente
+> descobre no `package.json`, `pyproject.toml` ou equivalente.
 
 ---
 
@@ -224,8 +225,8 @@ Valores exatos que o agente deve usar — nunca inventar cores, fontes ou espaç
 - `[ex: tailwind.config.ts — theme.extend.colors]`
 - `[ex: src/styles/tokens.css — CSS custom properties]`
 
-> Estes valores são copiados para o CLAUDE.md. Sem eles, o agente hardcoda hex arbitrários
-> e a interface fica inconsistente entre componentes.
+> Sem estes valores definidos, o agente hardcoda hex arbitrários e a interface fica inconsistente
+> entre componentes. O CLAUDE.md não os repete — aponta para esta seção e para o arquivo de config.
 
 ---
 

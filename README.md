@@ -1,5 +1,5 @@
 <p align="center">
-    <img src="docs/banner/pppok_full.png" width="900px">
+    <img src="docs/banner/pppok.png" width="900px">
 </p>
 
 <hr/>
@@ -23,7 +23,7 @@ A partir de uma ideia de produto, esta skill produz quatro documentos técnicos 
 | **MVP Scope** | Pesquisa de mercado, cenário competitivo, stack tecnológica recomendada, visão geral da arquitetura, prévia do modelo de dados, regras de negócio, monetização, roadmap de features e riscos |
 | **PRD** | Princípios de design, personas, mapa de casos de uso, requisitos funcionais com regras de negócio tipadas, estados de tela, layout em ASCII, user flows, especificação de features, schema de dados, roadmap por sprint e critérios de aceite globais |
 | **SPEC** | ADRs, especificação técnica módulo a módulo com assinaturas tipadas, lógica crítica, máquinas de estado, invariantes de domínio, sequência de build com checkpoints, diagramas de sequência, schema de banco com constraints, contratos de API, hierarquia de erros, segurança, observabilidade, estratégia de testes e pipeline CI/CD |
-| **CLAUDE.md** | Arquivo de contexto personalizado para o agente de IA, gerado automaticamente a partir dos três documentos anteriores: comandos de desenvolvimento, stack fixada com referência a ADRs, estrutura de diretórios, design tokens, invariantes de domínio, sequência de build, variáveis de ambiente, casos extremos, glossário e regras de execução. Abaixo de 300 palavras, pronto para colocar na raiz do repositório |
+| **CLAUDE.md** | Arquivo de contexto personalizado para o agente de IA, gerado automaticamente a partir dos três documentos anteriores. Contém só o que o agente não consegue descobrir lendo o código: comandos fora do padrão, regras não óbvias, proibições com origem em ADR, invariantes de domínio, casos extremos, passo atual do build e regras de execução. Cerca de 150 palavras, pronto para colocar na raiz do repositório |
 
 ---
 
@@ -155,23 +155,23 @@ Após a revisão, Claude pergunta:
 
 Claude gera um `CLAUDE.md` personalizado automaticamente — sem perguntas adicionais. Todo valor é extraído dos três documentos anteriores, nunca inventado.
 
-O `CLAUDE.md` gerado cobre:
+O `CLAUDE.md` gerado segue um único critério: **só entra o que o agente não consegue descobrir sozinho** lendo o código e a pasta `docs/`. Cobre:
 
-- **Visão geral do projeto** — nome, descrição em uma linha, stack, caminhos para os três documentos
-- **Comandos de desenvolvimento** — comandos literais para setup, dev, build, lint, format, testes e migrações, prontos para rodar
-- **Padrões obrigatórios de código** — convenções da linguagem, nomes de arquivo, formato de IDs e timestamps, classe base de exceções, padrões de acesso a banco e API
-- **O que NUNCA fazer** — proibições explícitas, cada uma rastreada ao ADR ou invariante que a origina, mais uma instrução permanente de registrar correções sempre que o agente cometer um erro
-- **Stack e versões fixadas** — com referência aos ADRs; o agente trata como decisões fechadas e não propõe alternativas
-- **Estrutura de diretórios** — pastas de primeiro nível com responsabilidade, para o agente saber onde criar cada arquivo
-- **Design tokens** — cores da marca e semânticas, fontes, escala de espaçamento (omitido em produtos CLI, API ou biblioteca)
-- **Invariantes críticas de domínio** — cada INV-XX em formato compacto com seu tipo e onde verificar no código
-- **Sequência de build** — passos com checkpoints, mais um campo de passo atual para o desenvolvedor acompanhar o progresso
-- **Variáveis de ambiente** — nome, padrão e se é obrigatória
-- **Casos extremos respondidos** — situações que o agente implementaria errado sem essa orientação
-- **Glossário do domínio** — o termo a usar no código versus os que devem ser evitados
+- **Projeto** — nome, descrição em uma frase e uma linha de ponteiros para os documentos (`docs/prd.md`, `docs/spec.md`, `.env.example`)
+- **Comandos fora do padrão** — apenas os que o agente não adivinharia: flags obrigatórias, setup em múltiplos passos, testes de banco/RLS, migrações, gerenciador de pacotes diferente do padrão
+- **Regras não óbvias** — convenções que contradizem o padrão do framework ou não aparecem em nenhum arquivo de config
+- **O que NUNCA fazer** — proibições explícitas, cada uma rastreada ao ADR ou invariante que a origina, incluindo as decisões de stack que o agente poderia tentar reverter; termina com uma instrução permanente de registrar correções sempre que o agente cometer um erro
+- **Invariantes de domínio** — cada INV-XX em uma linha, com seu tipo e onde verificar no código
+- **Casos extremos** — situações com comportamento não óbvio que o agente implementaria errado
+- **Sequência de build** — passos com checkpoints, mais um campo de passo atual para acompanhar o progresso
+- **Glossário** — apenas termos em que o nome ingênuo está errado (omitido na maioria dos projetos)
 - **Regras de execução** — seção fixa em todo arquivo gerado: toque apenas no que o pedido exige, nunca refatore código adjacente, remova só os órfãos que suas próprias mudanças criaram, declare ambiguidade em vez de adivinhar, apresente múltiplas interpretações em vez de escolher em silêncio
 
-O arquivo é mantido abaixo de 300 palavras. Como o Claude Code o carrega no início de cada sessão, cada token que ele consome é gasto antes mesmo de você digitar seu prompt — por isso ele carrega apenas o que muda o comportamento do agente.
+**O que fica de fora de propósito:** árvore de diretórios, tabela de stack, lista de variáveis de ambiente, design tokens e comandos padrão do ecossistema. Tudo isso continua completo na SPEC — o CLAUDE.md aponta para lá em vez de repetir.
+
+**Por que tão enxuto:** o Claude Code carrega o arquivo no início de cada sessão e o agente segue o que está nele. Uma pesquisa da ETH Zürich ([Gloaguen et al., 2026 — *Evaluating AGENTS.md*](https://arxiv.org/abs/2602.11988)) testou Claude Code, Codex e Qwen Code e mostrou que arquivos de contexto gerados por LLM reduziram a taxa de sucesso e aumentaram o custo de inferência em mais de 20%. Visões gerais do repositório não ajudaram os agentes a encontrar arquivos mais rápido, e o conteúdo era redundante com a documentação existente. Por isso a skill filtra cada linha pelo teste *"o agente erraria sem ela?"* e mantém o arquivo em torno de 150 palavras (teto de 200).
+
+**Como ele evolui:** o arquivo gerado é o ponto de partida. Ele cresce por falha observada — quando o agente erra algo que o CLAUDE.md poderia ter evitado, a correção vira uma linha nova.
 
 Coloque o `CLAUDE.md` na raiz do repositório do seu projeto.
 
@@ -313,7 +313,7 @@ ADR-01: FastAPI como framework de backend
 
 ---
 
-## 8. Máquinas de Estado e Invariantes de Domínio
+## 10. Máquinas de Estado e Invariantes de Domínio
 
 ### Fatura — Máquina de Estado
 
@@ -352,7 +352,7 @@ INV-04: [Autorização]
 
 ---
 
-## 9. Sequência de Build
+## 11. Sequência de Build
 
 Cada passo cabe em uma única sessão: ≤5 arquivos, ≤200 linhas.
 Todo checkpoint exige evidência concreta — um comando e seu resultado esperado.
@@ -392,39 +392,42 @@ PASSO 3: Lógica de negócio central
 ```markdown
 # CLAUDE.md — InvoiceApp
 
-## 1. Projeto
-InvoiceApp — controle de horas e geração de faturas para freelancers
-Stack: Python 3.12 · FastAPI · SQLite · PyJWT
-Docs: docs/mvp-scope.md · docs/prd.md · docs/spec.md
+## Projeto
+Controle de horas e geração de faturas para freelancers.
+Docs: docs/prd.md (regras) · docs/spec.md (arquitetura, tokens §7, estrutura §3) · .env.example
 
-## 2. Comandos
-Dev: `uvicorn src.main:app --reload` · Build: `docker build -t invoiceapp .`
-Lint: `ruff check src/` · Format: `black src/` · Test: `pytest`
-Migrações: `alembic upgrade head`
+## Comandos
+Migrações: `alembic upgrade head` (rodar antes de qualquer teste)
+Testes de integração: `pytest tests/integration --db=test` (exige banco de teste)
 
-## 4. NUNCA
-- NUNCA construir auth do zero — PyJWT conforme ADR-02
-- NUNCA permitir edição de fatura finalizada — INV-01
-- NUNCA usar SELECT * — sempre especificar campos
+## NUNCA
+- NUNCA construir auth do zero — PyJWT (ADR-02)
+- NUNCA trocar SQLite por outro banco no MVP (ADR-03)
+- NUNCA permitir edição de fatura finalizada (INV-01)
 - NUNCA avançar um passo de build sem a evidência do checkpoint
 - Quando cometer um erro, registrar aqui a correção
 
-## 8. Invariantes
+## Invariantes
 INV-01 [Inv] Fatura finalizada tem número único não-nulo · InvoiceRepository.save()
-INV-02 [Val] Finalizar exige ≥1 item de linha com horas > 0 · InvoiceService.finalize()
+INV-02 [Val] Finalizar exige ≥1 item com horas > 0 · InvoiceService.finalize()
 INV-03 [Autz] Só dono ou admin cancela fatura finalizada · middleware de auth
 
-## 9. Build
+## Casos extremos
+Cliente sem valor/hora → bloquear geração com aviso inline, não usar zero
+
+## Build
 1 Setup ✔ /health 200 · 2 Migrações ✔ idempotente · 3 Core ✔ pytest + 80%
 Passo atual: 1
 
-## 13. Execução
+## Execução
 - Toque apenas no que o pedido exige — não refatore nem reformate código adjacente
 - Remova só os órfãos que suas mudanças criaram; código morto pré-existente, apenas mencione
 - Ambiguidade: declare o que está confuso e pergunte antes de implementar
 - Interpretações múltiplas: apresente-as, não escolha em silêncio
 - Combine com o estilo existente do arquivo, mesmo que você faria diferente
 ```
+
+Repare no que **não** está ali: nada de `uvicorn src.main:app`, `pytest` ou `ruff` puros (o agente descobre no `pyproject.toml`), nenhuma árvore de diretórios, nenhuma tabela de stack.
 
 ---
 
@@ -437,7 +440,7 @@ istofel-project-plan/
     ├── mvp-scope.md                # Estrutura completa do MVP Scope e checklist
     ├── prd.md                      # Estrutura completa do PRD e checklist
     ├── spec.md                     # Estrutura completa da SPEC e checklist (23 seções)
-    └── claude-md.md                # Regras de geração do CLAUDE.md, fontes por seção e limite de palavras
+    └── claude-md.md                # Regras de geração do CLAUDE.md: critério de descobribilidade, fontes e limite
 ```
 
 ---
